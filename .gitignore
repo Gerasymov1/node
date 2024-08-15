@@ -1,0 +1,15 @@
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+.npmrc
+
+# Build folder
+dist
+
+# Environment variables
+.env
+
+.idea
+.vscode
