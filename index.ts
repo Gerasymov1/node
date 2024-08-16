@@ -2,10 +2,19 @@ import express from "express";
 
 import { MOCKED_USERS, PORT } from "./src/constants";
 import { User } from "./src/types";
+import { handleIndexByUserId } from "./src/middlewares";
 
 const app = express();
 
 app.use(express.json());
+
+declare global {
+  namespace Express {
+    export interface Request {
+      userIndex?: number;
+    }
+  }
+}
 
 app.get("/", (_, res) => {
   res.status(201).send({ message: "Hello World" });
@@ -33,22 +42,16 @@ app.get("/api/users", (request, response) => {
   return response.send(MOCKED_USERS);
 });
 
-app.get("/api/users/:id", (request, response) => {
-  const { id } = request.params;
+app.get("/api/users/:id", handleIndexByUserId, (request, response) => {
+  const { userIndex } = request;
 
-  const parsedId = parseInt(id);
-
-  if (isNaN(parsedId)) {
-    response.status(400).send({ message: "Invalid ID" });
-  }
-
-  const user = MOCKED_USERS.find((user) => user.id === parsedId);
+  const user = MOCKED_USERS[userIndex as number];
 
   if (!user) {
     response.sendStatus(404);
   }
 
-  response.send(user);
+  return response.send(user);
 });
 
 app.post("/api/users", (request, response) => {
@@ -71,26 +74,11 @@ app.post("/api/users", (request, response) => {
   return response.status(201).send(newUser);
 });
 
-app.put("/api/users/:id", (request, response) => {
-  const {
-    body,
-    params: { id },
-  } = request;
+app.put("/api/users/:id", handleIndexByUserId, (request, response) => {
+  const { body, userIndex } = request;
 
-  const parsedId = parseInt(id);
-
-  if (isNaN(parsedId)) {
-    return response.sendStatus(400);
-  }
-
-  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
-
-  if (userIndex === -1) {
-    return response.sendStatus(404);
-  }
-
-  MOCKED_USERS[userIndex] = {
-    id: parsedId,
+  MOCKED_USERS[userIndex as number] = {
+    id: MOCKED_USERS[userIndex as number].id,
     ...body,
   };
 
@@ -98,25 +86,10 @@ app.put("/api/users/:id", (request, response) => {
 });
 
 app.patch("/api/users/:id", (request, response) => {
-  const {
-    body,
-    params: { id },
-  } = request;
+  const { body, userIndex } = request;
 
-  const parsedId = parseInt(id);
-
-  if (isNaN(parsedId)) {
-    return response.sendStatus(400);
-  }
-
-  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
-
-  if (userIndex === -1) {
-    return response.sendStatus(404);
-  }
-
-  MOCKED_USERS[userIndex] = {
-    ...MOCKED_USERS[userIndex],
+  MOCKED_USERS[userIndex as number] = {
+    ...MOCKED_USERS[userIndex as number],
     ...body,
   };
 
@@ -124,21 +97,9 @@ app.patch("/api/users/:id", (request, response) => {
 });
 
 app.delete("/api/users/:id", (request, response) => {
-  const { id } = request.params;
+  const { userIndex } = request;
 
-  const parsedId = parseInt(id);
-
-  if (isNaN(parsedId)) {
-    return response.sendStatus(400);
-  }
-
-  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
-
-  if (userIndex === -1) {
-    return response.sendStatus(404);
-  }
-
-  MOCKED_USERS.splice(userIndex, 1);
+  MOCKED_USERS.splice(userIndex as number, 1);
 
   return response.sendStatus(204);
 });
