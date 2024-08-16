@@ -1,6 +1,6 @@
 import express from "express";
 
-import { mockedUsers, PORT } from "./src/constants";
+import { MOCKED_USERS, PORT } from "./src/constants";
 import { User } from "./src/types";
 
 const app = express();
@@ -17,7 +17,7 @@ app.get("/api/users", (request, response) => {
   } = request;
 
   if (filter && value) {
-    const users = mockedUsers.filter((user: User) => {
+    const users = MOCKED_USERS.filter((user: User) => {
       const userValue = user[filter as keyof User];
 
       if (typeof userValue === "string" && typeof value === "string") {
@@ -30,7 +30,7 @@ app.get("/api/users", (request, response) => {
     return response.send(users);
   }
 
-  return response.send(mockedUsers);
+  return response.send(MOCKED_USERS);
 });
 
 app.get("/api/users/:id", (request, response) => {
@@ -42,7 +42,7 @@ app.get("/api/users/:id", (request, response) => {
     response.status(400).send({ message: "Invalid ID" });
   }
 
-  const user = mockedUsers.find((user) => user.id === parsedId);
+  const user = MOCKED_USERS.find((user) => user.id === parsedId);
 
   if (!user) {
     response.sendStatus(404);
@@ -58,7 +58,7 @@ app.post("/api/users", (request, response) => {
     response.status(400).send({ message: "Invalid data" });
   }
 
-  const id = mockedUsers[mockedUsers.length - 1].id + 1;
+  const id = MOCKED_USERS[MOCKED_USERS.length - 1].id + 1;
 
   const newUser = {
     id,
@@ -66,7 +66,7 @@ app.post("/api/users", (request, response) => {
     displayName,
   };
 
-  mockedUsers.push(newUser);
+  MOCKED_USERS.push(newUser);
 
   return response.status(201).send(newUser);
 });
@@ -83,13 +83,13 @@ app.put("/api/users/:id", (request, response) => {
     return response.sendStatus(400);
   }
 
-  const userIndex = mockedUsers.findIndex((user) => user.id === parsedId);
+  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
 
   if (userIndex === -1) {
     return response.sendStatus(404);
   }
 
-  mockedUsers[userIndex] = {
+  MOCKED_USERS[userIndex] = {
     id: parsedId,
     ...body,
   };
@@ -109,14 +109,14 @@ app.patch("/api/users/:id", (request, response) => {
     return response.sendStatus(400);
   }
 
-  const userIndex = mockedUsers.findIndex((user) => user.id === parsedId);
+  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
 
   if (userIndex === -1) {
     return response.sendStatus(404);
   }
 
-  mockedUsers[userIndex] = {
-    ...mockedUsers[userIndex],
+  MOCKED_USERS[userIndex] = {
+    ...MOCKED_USERS[userIndex],
     ...body,
   };
 
@@ -132,13 +132,13 @@ app.delete("/api/users/:id", (request, response) => {
     return response.sendStatus(400);
   }
 
-  const userIndex = mockedUsers.findIndex((user) => user.id === parsedId);
+  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
 
   if (userIndex === -1) {
     return response.sendStatus(404);
   }
 
-  mockedUsers.splice(userIndex, 1);
+  MOCKED_USERS.splice(userIndex, 1);
 
   return response.sendStatus(204);
 });

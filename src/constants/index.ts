@@ -5,7 +5,7 @@ dotenv.config();
 
 export const PORT = process.env.PORT || 3000;
 
-export const mockedUsers: User[] = [
+export const MOCKED_USERS: User[] = [
   {
     id: 1,
     username: "john doe",
