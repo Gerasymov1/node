@@ -2,6 +2,7 @@ import express from "express";
 
 import { PORT } from "./src/constants";
 import router from "./src/routes";
+import { handleSetHeaders } from "./src/middlewares";
 
 declare global {
   namespace Express {
@@ -14,6 +15,8 @@ declare global {
 const app = express();
 
 app.use(express.json());
+
+app.use(handleSetHeaders);
 
 app.use(router);
 
