@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { MOCKED_USERS } from "../constants";
 import { User } from "../types";
-import { handleIndexByUserId } from "../middlewares";
 
 export const usersRouter = Router();
 
@@ -27,8 +26,22 @@ usersRouter.get("/api/users", (request, response) => {
   return response.send(MOCKED_USERS);
 });
 
-usersRouter.get("/api/users/:id", handleIndexByUserId, (request, response) => {
-  const { userIndex } = request;
+usersRouter.get("/api/users/:id", (request, response) => {
+  const {
+    params: { id },
+  } = request;
+
+  const parsedId = parseInt(id);
+
+  if (isNaN(parsedId)) {
+    return response.sendStatus(400);
+  }
+
+  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
+
+  if (userIndex === -1) {
+    return response.sendStatus(404);
+  }
 
   const user = MOCKED_USERS[userIndex as number];
 
@@ -59,8 +72,23 @@ usersRouter.post("/api/users", (request, response) => {
   return response.status(201).send(newUser);
 });
 
-usersRouter.put("/api/users/:id", handleIndexByUserId, (request, response) => {
-  const { body, userIndex } = request;
+usersRouter.put("/api/users/:id", (request, response) => {
+  const {
+    params: { id },
+    body,
+  } = request;
+
+  const parsedId = parseInt(id);
+
+  if (isNaN(parsedId)) {
+    return response.sendStatus(400);
+  }
+
+  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
+
+  if (userIndex === -1) {
+    return response.sendStatus(404);
+  }
 
   MOCKED_USERS[userIndex as number] = {
     id: MOCKED_USERS[userIndex as number].id,
@@ -71,7 +99,22 @@ usersRouter.put("/api/users/:id", handleIndexByUserId, (request, response) => {
 });
 
 usersRouter.patch("/api/users/:id", (request, response) => {
-  const { body, userIndex } = request;
+  const {
+    params: { id },
+    body,
+  } = request;
+
+  const parsedId = parseInt(id);
+
+  if (isNaN(parsedId)) {
+    return response.sendStatus(400);
+  }
+
+  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
+
+  if (userIndex === -1) {
+    return response.sendStatus(404);
+  }
 
   MOCKED_USERS[userIndex as number] = {
     ...MOCKED_USERS[userIndex as number],
@@ -82,7 +125,21 @@ usersRouter.patch("/api/users/:id", (request, response) => {
 });
 
 usersRouter.delete("/api/users/:id", (request, response) => {
-  const { userIndex } = request;
+  const {
+    params: { id },
+  } = request;
+
+  const parsedId = parseInt(id);
+
+  if (isNaN(parsedId)) {
+    return response.sendStatus(400);
+  }
+
+  const userIndex = MOCKED_USERS.findIndex((user) => user.id === parsedId);
+
+  if (userIndex === -1) {
+    return response.sendStatus(404);
+  }
 
   MOCKED_USERS.splice(userIndex as number, 1);
 

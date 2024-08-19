@@ -4,14 +4,6 @@ import { PORT } from "./src/constants";
 import router from "./src/routes";
 import { handleSetHeaders } from "./src/middlewares";
 
-declare global {
-  namespace Express {
-    export interface Request {
-      userIndex?: number;
-    }
-  }
-}
-
 const app = express();
 
 app.use(express.json());
