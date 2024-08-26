@@ -5,8 +5,8 @@ export type User = {
 };
 
 export type UserDB = {
-  id: number;
+  id?: number;
   firstName: string;
   lastName: string;
-  refreshToken: string;
+  password: string;
 };
