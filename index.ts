@@ -6,6 +6,14 @@ import { handleSetHeaders } from "./src/middlewares";
 
 import { initializeTables } from "./src/models";
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
+
 const app = express();
 
 app.use(express.json());
