@@ -1,8 +1,8 @@
 import { authenticate } from "../../middlewares";
 import { Router } from "express";
 
-export const basicRouter = Router();
+export const securedRouter = Router();
 
-basicRouter.get("/api/secured", authenticate, (req, res) => {
-  res.send({ message: "You are authenticated" });
+securedRouter.get("/api/secured", authenticate, (req, res) => {
+  res.send({ message: "You are authenticated", user: req.user });
 });

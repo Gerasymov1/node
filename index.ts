@@ -5,11 +5,12 @@ import router from "./src/routes";
 import { handleSetHeaders } from "./src/middlewares";
 
 import { initializeTables } from "./src/models";
+import { UserDB } from "./src/types";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: Partial<UserDB>;
     }
   }
 }
