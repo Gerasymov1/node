@@ -26,6 +26,7 @@ export const authenticate = async (
       firstName: decoded.firstName,
       lastName: decoded.lastName,
     };
+
     next();
   } catch (error) {
     if (!refreshToken) {

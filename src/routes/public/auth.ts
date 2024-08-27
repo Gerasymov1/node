@@ -4,6 +4,11 @@ import bcrypt from "bcrypt";
 import { SECRET_KEY } from "../../constants";
 import { UserDB } from "../../types";
 import { db } from "../../settings/db";
+import { QueryResult } from "mysql2";
+
+type ExtendedQueryResult = {
+  insertId: number;
+} & QueryResult;
 
 export const authRouter = Router();
 
@@ -14,7 +19,7 @@ authRouter.post("/api/login", (req, res) => {
     return res.status(400).send("Invalid request, fill in all fields");
   }
 
-  const query = "SELECT * FROM users WHERE firstName = ? AND lastName = ?;";
+  const query = "SELECT * FROM Users WHERE firstName = ? AND lastName = ?;";
 
   db.query(query, [firstName, lastName], (err, result) => {
     if (err) {
@@ -51,9 +56,9 @@ authRouter.post("/api/login", (req, res) => {
 });
 
 authRouter.post("/api/registration", async (req, res) => {
-  const { firstName, lastName } = req.body;
+  const { firstName, lastName, password } = req.body;
 
-  const checkIfUserExistsFirstNameAndLastName = `SELECT * FROM users WHERE firstName = ? AND lastName = ?;`;
+  const checkIfUserExistsFirstNameAndLastName = `SELECT * FROM Users WHERE firstName = ? AND lastName = ?;`;
 
   db.query(
     checkIfUserExistsFirstNameAndLastName,
@@ -67,36 +72,63 @@ authRouter.post("/api/registration", async (req, res) => {
         return res.status(409).send("User already exists");
       }
 
-      const salt = 10;
+      const saltRounds = 10;
 
-      bcrypt.hash(req.body.password, salt, (err, hash) => {
+      bcrypt.hash(password, saltRounds, (err, hash) => {
         if (err) {
           return res.status(500).send("Error hashing password");
         }
 
         const user = {
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
+          firstName,
+          lastName,
           password: hash,
         };
 
-        const query = "INSERT INTO users SET ?";
+        const query = "INSERT INTO Users SET ?;";
 
-        db.query(query, user, (err, result) => {
+        db.query(query, user, (err, result: ExtendedQueryResult) => {
           if (err) {
             return res.status(500).send("Error inserting user");
           }
 
-          const accessToken = jwt.sign(user, SECRET_KEY, { expiresIn: "1h" });
-          const refreshToken = jwt.sign(user, SECRET_KEY, { expiresIn: "1d" });
+          const accessToken = jwt.sign(
+            { userId: result.insertId },
+            SECRET_KEY,
+            { expiresIn: "1h" }
+          );
 
-          console.log("accessToken:", accessToken);
-          console.log("refreshToken:", refreshToken);
+          const refreshTokenExpiresAt = new Date();
+          refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
-          res
-            .cookie("refreshToken", refreshToken)
-            .cookie("accessToken", accessToken)
-            .send(user);
+          const refreshToken = jwt.sign(
+            { userId: result.insertId },
+            SECRET_KEY,
+            {
+              expiresIn: "7d",
+            }
+          );
+
+          const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
+
+          db.query(
+            setRefreshToken,
+            [refreshToken, result.insertId, refreshTokenExpiresAt],
+            (err, result) => {
+              if (err) {
+                return res.status(500).send("Error setting refresh token");
+              }
+
+              console.log("accessToken:", accessToken);
+              console.log("refreshToken:", refreshToken);
+
+              res
+                .cookie("refreshToken", refreshToken)
+                .cookie("accessToken", accessToken)
+                .status(201)
+                .send(user);
+            }
+          );
         });
       });
     }
