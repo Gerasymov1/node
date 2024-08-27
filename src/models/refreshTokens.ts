@@ -16,12 +16,12 @@ export const createRefreshTokensTable = async () => {
     console.log("Creating refresh tokens table");
 
     const query = `CREATE TABLE IF NOT EXISTS RefreshTokens (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            token VARCHAR(255) NOT NULL,
-            userId INT NOT NULL,
-            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              userId INT NOT NULL,
+              token VARCHAR(255) NOT NULL,
+              expiresAt DATETIME NOT NULL,
+              createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
         );`;
 
     db.query(query, (err) => {
