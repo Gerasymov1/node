@@ -44,7 +44,7 @@ authRouter.post("/api/login", (req, res) => {
 
       res
         .cookie("refreshToken", refreshToken)
-        .header("Authorization", `Bearer ${accessToken}`)
+        .cookie("accessToken", accessToken)
         .send(user);
     });
   });
@@ -95,7 +95,7 @@ authRouter.post("/api/registration", async (req, res) => {
 
           res
             .cookie("refreshToken", refreshToken)
-            .header("Authorization", `Bearer ${accessToken}`)
+            .cookie("accessToken", accessToken)
             .send(user);
         });
       });

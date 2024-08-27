@@ -1,4 +1,5 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 
 import { PORT } from "./src/constants";
 import router from "./src/routes";
@@ -16,6 +17,8 @@ declare global {
 }
 
 const app = express();
+
+app.use(cookieParser());
 
 app.use(express.json());
 

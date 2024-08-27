@@ -9,8 +9,8 @@ export const authenticate = async (
   res: Response,
   next: NextFunction
 ) => {
-  const accessToken = req.header("Authorization")?.split(" ")[1] || "";
-  const refreshToken = req.header("Cookie")?.split("=")[1] || "";
+  const accessToken = req.cookies.accessToken;
+  const refreshToken = req.cookies.refreshToken;
 
   if (!accessToken && !refreshToken) {
     return res.status(401).send("Unauthorized");
