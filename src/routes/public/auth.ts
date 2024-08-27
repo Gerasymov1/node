@@ -41,16 +41,37 @@ authRouter.post("/api/login", (req, res) => {
         return res.status(401).send("Invalid password or first name/last name");
       }
 
-      const accessToken = jwt.sign(user, SECRET_KEY, { expiresIn: "1h" });
-      const refreshToken = jwt.sign(user, SECRET_KEY, { expiresIn: "1d" });
+      const accessToken = jwt.sign({ userId: user.id }, SECRET_KEY, {
+        expiresIn: "1h",
+      });
 
-      console.log("accessToken:", accessToken);
-      console.log("refreshToken:", refreshToken);
+      const refreshTokenExpiresAt = new Date();
+      refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
-      res
-        .cookie("refreshToken", refreshToken)
-        .cookie("accessToken", accessToken)
-        .send(user);
+      const refreshToken = jwt.sign({ userId: user.id }, SECRET_KEY, {
+        expiresIn: "7d",
+      });
+
+      const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
+
+      db.query(
+        setRefreshToken,
+        [refreshToken, user.id, refreshTokenExpiresAt],
+        (err, result) => {
+          if (err) {
+            return res.status(500).send("Error setting refresh token");
+          }
+
+          console.log("accessToken:", accessToken);
+          console.log("refreshToken:", refreshToken);
+
+          res
+            .cookie("refreshToken", refreshToken)
+            .cookie("accessToken", accessToken)
+            .status(201)
+            .send(user);
+        }
+      );
     });
   });
 });
