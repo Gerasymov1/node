@@ -1,5 +1,5 @@
 import { db } from "../settings/db";
-import { UserDB } from "../types";
+import { User } from "../types";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../constants";
@@ -28,7 +28,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(404).send("User not found");
     }
 
-    const user = (result as [UserDB])[0];
+    const user = (result as [User])[0];
 
     bcrypt.compare(password, user.password, (err, result) => {
       if (err) {
@@ -162,7 +162,7 @@ export const updateUser = async (req: Request, res: Response) => {
       return res.status(404).send("User not found");
     }
 
-    const user = (result as [UserDB])[0];
+    const user = (result as [User])[0];
 
     const query = "UPDATE Users SET firstName = ?, lastName = ? WHERE id = ?;";
 

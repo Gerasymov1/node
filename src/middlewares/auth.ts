@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../constants";
-import { UserDB } from "../types";
+import { User } from "../types";
 
 export const authenticate = async (
   req: Request,
@@ -18,7 +18,7 @@ export const authenticate = async (
 
   try {
     const decoded = jwt.verify(accessToken, SECRET_KEY) as Omit<
-      UserDB,
+      User,
       "password | id"
     >;
 

@@ -5,12 +5,12 @@ import { PORT } from "./src/constants";
 import router from "./src/routes";
 import { handleSetHeaders } from "./src/middlewares";
 
-import { UserDB } from "./src/types";
+import { User } from "./src/types";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: Partial<UserDB>;
+      user?: Partial<User>;
     }
   }
 }
