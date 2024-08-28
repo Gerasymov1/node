@@ -1,18 +1,16 @@
-import { Router } from "express";
-import jwt from "jsonwebtoken";
+import { db } from "../settings/db";
+import { UserDB } from "../types";
 import bcrypt from "bcrypt";
-import { SECRET_KEY } from "../../constants";
-import { UserDB } from "../../types";
-import { db } from "../../settings/db";
+import jwt from "jsonwebtoken";
+import { SECRET_KEY } from "../constants";
+import { Request, Response } from "express";
 import { QueryResult } from "mysql2";
 
 type ExtendedQueryResult = {
   insertId: number;
 } & QueryResult;
 
-export const authRouter = Router();
-
-authRouter.post("/api/login", (req, res) => {
+export const login = async (req: Request, res: Response) => {
   const { firstName, lastName, password } = req.body;
 
   if (!firstName || !lastName || !password) {
@@ -74,9 +72,9 @@ authRouter.post("/api/login", (req, res) => {
       );
     });
   });
-});
+};
 
-authRouter.post("/api/registration", async (req, res) => {
+export const register = async (req: Request, res: Response) => {
   const { firstName, lastName, password } = req.body;
 
   const checkIfUserExistsFirstNameAndLastName = `SELECT * FROM Users WHERE firstName = ? AND lastName = ?;`;
@@ -148,4 +146,4 @@ authRouter.post("/api/registration", async (req, res) => {
       });
     }
   );
-});
+};
