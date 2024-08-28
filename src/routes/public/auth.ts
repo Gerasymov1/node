@@ -41,14 +41,14 @@ authRouter.post("/api/login", (req, res) => {
         return res.status(401).send("Invalid password or first name/last name");
       }
 
-      const accessToken = jwt.sign({ userId: user.id }, SECRET_KEY, {
+      const accessToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
         expiresIn: "1h",
       });
 
       const refreshTokenExpiresAt = new Date();
       refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
-      const refreshToken = jwt.sign({ userId: user.id }, SECRET_KEY, {
+      const refreshToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
         expiresIn: "7d",
       });
 
@@ -113,22 +113,16 @@ authRouter.post("/api/registration", async (req, res) => {
             return res.status(500).send("Error inserting user");
           }
 
-          const accessToken = jwt.sign(
-            { userId: result.insertId },
-            SECRET_KEY,
-            { expiresIn: "1h" }
-          );
+          const accessToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
+            expiresIn: "1h",
+          });
 
           const refreshTokenExpiresAt = new Date();
           refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
-          const refreshToken = jwt.sign(
-            { userId: result.insertId },
-            SECRET_KEY,
-            {
-              expiresIn: "7d",
-            }
-          );
+          const refreshToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
+            expiresIn: "7d",
+          });
 
           const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
 
