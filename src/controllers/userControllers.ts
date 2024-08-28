@@ -147,3 +147,31 @@ export const register = async (req: Request, res: Response) => {
     }
   );
 };
+
+export const updateUser = async (req: Request, res: Response) => {
+  const { firstName, lastName, id } = req.body;
+
+  const findUser = "SELECT * FROM Users WHERE id = ?;";
+
+  db.query(findUser, [id], (err, result) => {
+    if (err) {
+      return res.status(500).send("Error finding user");
+    }
+
+    if ((result as []).length === 0) {
+      return res.status(404).send("User not found");
+    }
+
+    const user = (result as [UserDB])[0];
+
+    const query = "UPDATE Users SET firstName = ?, lastName = ? WHERE id = ?;";
+
+    db.query(query, [firstName, lastName, id], (err, result) => {
+      if (err) {
+        return res.status(500).send("Error updating user");
+      }
+
+      res.status(204).send(user);
+    });
+  });
+};
