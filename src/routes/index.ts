@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { userRouter } from "./public";
-import { securedRouter } from "./secured";
+import { publicAuthRouter } from "./authRouts/public";
+import { privateUserRouter } from "./userRouts/privateUserRouter";
+import { verifyToken } from "../middlewares";
 
 const router = Router();
 
-router.use(userRouter);
-router.use(securedRouter);
+router.use("/auth", publicAuthRouter);
+
+router.use("/user", verifyToken, privateUserRouter);
 
 export default router;

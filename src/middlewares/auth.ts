@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../constants";
 import { User } from "../types";
 
-export const authenticate = async (
+export const verifyToken = async (
   req: Request,
   res: Response,
   next: NextFunction

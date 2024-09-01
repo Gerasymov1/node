@@ -22,7 +22,7 @@ app.use(express.json());
 
 app.use(handleSetHeaders);
 
-app.use(router);
+app.use("/api", router);
 
 app.get("/", (_, res) => {
   res.status(201).send({ message: "Hello World" });
