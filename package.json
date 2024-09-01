@@ -2,10 +2,11 @@
   "name": "node",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "src/index.ts",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.ts",
+    "dev": "nodemon --watch src --exec 'npx tsx' src/index.ts",
     "build": "tsc --project ./",
     "create:tables": "ts-node --esm ./src/models/index.ts"
   },
@@ -32,6 +33,7 @@
     "@types/node": "^22.3.0",
     "express": "^4.19.2",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.0",
     "typescript": "^5.5.4"
   }
 }

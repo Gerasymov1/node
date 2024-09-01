@@ -1,11 +1,10 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 
-import { PORT } from "./src/constants";
-import router from "./src/routes";
-import { handleSetHeaders } from "./src/middlewares";
-
-import { User } from "./src/types";
+import router from "./routes/index.js";
+import { User } from "./types";
+import { handleSetHeaders } from "./middlewares";
+import { PORT } from "./constants";
 
 declare global {
   namespace Express {

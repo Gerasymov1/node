@@ -1,4 +1,4 @@
-import { db } from "../settings/db";
+import connection from "../settings/db";
 import { User } from "../types";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -19,59 +19,52 @@ export const login = async (req: Request, res: Response) => {
 
   const query = "SELECT * FROM Users WHERE firstName = ? AND lastName = ?;";
 
-  db.query(query, [firstName, lastName], (err, result) => {
-    if (err) {
-      return res.status(500).send("Error checking if user exists");
-    }
+  const [rows]: any = await connection.execute(query, [firstName, lastName]);
 
-    if ((result as []).length === 0) {
-      return res.status(404).send("User not found");
-    }
+  const user = rows[0] as User;
 
-    const user = (result as [User])[0];
+  if (!user) {
+    return res.status(404).send("User not found");
+  }
 
-    bcrypt.compare(password, user.password, (err, result) => {
-      if (err) {
-        return res.status(500).send("Error comparing passwords");
-      }
+  const match = await bcrypt.compare(password, user.password);
 
-      if (!result) {
-        return res.status(401).send("Invalid password or first name/last name");
-      }
+  if (!match) {
+    return res.status(401).send("Invalid password or first name/last name");
+  }
 
-      const accessToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
-        expiresIn: "1h",
-      });
-
-      const refreshTokenExpiresAt = new Date();
-      refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
-
-      const refreshToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
-        expiresIn: "7d",
-      });
-
-      const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
-
-      db.query(
-        setRefreshToken,
-        [refreshToken, user.id, refreshTokenExpiresAt],
-        (err, result) => {
-          if (err) {
-            return res.status(500).send("Error setting refresh token");
-          }
-
-          console.log("accessToken:", accessToken);
-          console.log("refreshToken:", refreshToken);
-
-          res
-            .cookie("refreshToken", refreshToken)
-            .cookie("accessToken", accessToken)
-            .status(201)
-            .send(user);
-        }
-      );
-    });
+  const accessToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
+    expiresIn: "1h",
   });
+
+  const refreshTokenExpiresAt = new Date();
+
+  refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
+
+  const refreshToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
+    expiresIn: "7d",
+  });
+
+  const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
+
+  const [result] = await connection.execute(setRefreshToken, [
+    refreshToken,
+    user.id,
+    refreshTokenExpiresAt,
+  ]);
+
+  if ((result as ExtendedQueryResult).insertId === 0) {
+    return res.status(500).send("Error setting refresh token");
+  }
+
+  console.log("accessToken:", accessToken);
+  console.log("refreshToken:", refreshToken);
+
+  res
+    .cookie("refreshToken", refreshToken)
+    .cookie("accessToken", accessToken)
+    .status(201)
+    .send(user);
 };
 
 export const register = async (req: Request, res: Response) => {
@@ -79,99 +72,94 @@ export const register = async (req: Request, res: Response) => {
 
   const checkIfUserExistsFirstNameAndLastName = `SELECT * FROM Users WHERE firstName = ? AND lastName = ?;`;
 
-  db.query(
+  const [rows] = await connection.execute(
     checkIfUserExistsFirstNameAndLastName,
-    [firstName, lastName],
-    (err, result) => {
-      if (err) {
-        return res.status(500).send("Error checking if user exists");
-      }
-
-      if ((result as []).length > 0) {
-        return res.status(409).send("User already exists");
-      }
-
-      const saltRounds = 10;
-
-      bcrypt.hash(password, saltRounds, (err, hash) => {
-        if (err) {
-          return res.status(500).send("Error hashing password");
-        }
-
-        const user = {
-          firstName,
-          lastName,
-          password: hash,
-        };
-
-        const query = "INSERT INTO Users SET ?;";
-
-        db.query(query, user, (err, result: ExtendedQueryResult) => {
-          if (err) {
-            return res.status(500).send("Error inserting user");
-          }
-
-          const accessToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
-            expiresIn: "1h",
-          });
-
-          const refreshTokenExpiresAt = new Date();
-          refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
-
-          const refreshToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
-            expiresIn: "7d",
-          });
-
-          const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
-
-          db.query(
-            setRefreshToken,
-            [refreshToken, result.insertId, refreshTokenExpiresAt],
-            (err, result) => {
-              if (err) {
-                return res.status(500).send("Error setting refresh token");
-              }
-
-              console.log("accessToken:", accessToken);
-              console.log("refreshToken:", refreshToken);
-
-              res
-                .cookie("refreshToken", refreshToken)
-                .cookie("accessToken", accessToken)
-                .status(201)
-                .send(user);
-            }
-          );
-        });
-      });
-    }
+    [firstName, lastName]
   );
+
+  if ((rows as []).length > 0) {
+    return res.status(409).send("User already exists");
+  }
+
+  const saltRounds = 10;
+
+  const hash = await bcrypt.hash(password, saltRounds);
+
+  const user = {
+    firstName,
+    lastName,
+    password: hash,
+  };
+
+  const query = "INSERT INTO Users SET ?;";
+
+  const [result] = await connection.execute(query, user);
+
+  const accessToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
+    expiresIn: "1h",
+  });
+
+  const refreshTokenExpiresAt = new Date();
+
+  refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
+
+  const refreshToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
+    expiresIn: "7d",
+  });
+
+  const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
+
+  const [refreshTokenResult] = await connection.execute(setRefreshToken, [
+    refreshToken,
+    (result as ExtendedQueryResult).insertId,
+    refreshTokenExpiresAt,
+  ]);
+
+  if (!refreshTokenResult) {
+    return res.status(500).send("Error setting refresh token");
+  }
+
+  console.log("accessToken:", accessToken);
+  console.log("refreshToken:", refreshToken);
+
+  res
+    .cookie("refreshToken", refreshToken)
+    .cookie("accessToken", accessToken)
+    .status(201)
+    .send(user);
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  const { firstName, lastName, id } = req.body;
+  const { firstName, lastName, password } = req.body;
 
-  const findUser = "SELECT * FROM Users WHERE id = ?;";
+  if (!firstName || !lastName || !password) {
+    return res.status(400).send("Invalid request, fill in all fields");
+  }
 
-  db.query(findUser, [id], (err, result) => {
-    if (err) {
-      return res.status(500).send("Error finding user");
-    }
+  const checkIfUserExistsFirstNameAndLastName = `SELECT * FROM Users WHERE firstName = ? AND lastName = ?;`;
 
-    if ((result as []).length === 0) {
-      return res.status(404).send("User not found");
-    }
+  const [rows] = await connection.execute(
+    checkIfUserExistsFirstNameAndLastName,
+    [firstName, lastName]
+  );
 
-    const user = (result as [User])[0];
+  if ((rows as []).length === 0) {
+    return res.status(404).send("User not found");
+  }
 
-    const query = "UPDATE Users SET firstName = ?, lastName = ? WHERE id = ?;";
+  const saltRounds = 10;
 
-    db.query(query, [firstName, lastName, id], (err, result) => {
-      if (err) {
-        return res.status(500).send("Error updating user");
-      }
+  const hash = await bcrypt.hash(password, saltRounds);
 
-      res.status(204).send(user);
-    });
-  });
+  const user = {
+    firstName,
+    lastName,
+    password: hash,
+  };
+
+  const query = `UPDATE Users SET ? WHERE firstName = ? AND lastName = ?;`;
+
+  await connection.execute(query, [user, firstName, lastName]);
+
+  res.status(204).send();
 };
