@@ -6,11 +6,13 @@ import {
   insertChatQuery,
   updateChatQuery,
 } from "../queries";
+import logger from "../config/logger";
 
 export const createChat = async (req: Request, res: Response) => {
   const { title, creatorId } = req.body;
 
   if (!title || !creatorId) {
+    logger.error("Title and creatorId are required");
     return res
       .status(400)
       .json({ message: "Title and creatorId are required" });
@@ -29,6 +31,7 @@ export const deleteChat = async (req: Request, res: Response) => {
   const { id } = req.body;
 
   if (!id) {
+    logger.error("ChatId is required");
     return res.status(400).json({ message: "ChatId is required" });
   }
 
@@ -55,6 +58,7 @@ export const editChat = async (req: Request, res: Response) => {
   const { id, title } = req.body;
 
   if (!id || !title) {
+    logger.error("ChatId and title are required");
     return res.status(400).json({ message: "ChatId and title are required" });
   }
 
