@@ -7,9 +7,11 @@ import {
   updateChatQuery,
 } from "../queries";
 import logger from "../config/logger";
+import { User } from "../types";
 
 export const createChat = async (req: Request, res: Response) => {
-  const { title, creatorId } = req.body;
+  const { title } = req.body;
+  const { id: creatorId } = req.user as User;
 
   if (!title || !creatorId) {
     logger.error("Title and creatorId are required");

@@ -19,15 +19,14 @@ export const verifyToken = async (
   try {
     const decoded = jwt.verify(accessToken, SECRET_KEY) as Omit<
       User,
-      "password | id"
+      "password"
     >;
-
-    console.log(decoded);
 
     req.user = {
       firstName: decoded.firstName,
       lastName: decoded.lastName,
-    };
+      id: decoded.id,
+    } as User;
 
     next();
   } catch (error) {
