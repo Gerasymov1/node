@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch src --exec 'npx tsx' src/index.ts",
+    "dev": "nodemon --watch src --exec npx tsx src/index.ts",
     "build": "tsc --project ./",
-    "create:tables": "ts-node --esm ./src/models/index.ts"
+    "create:tables": "npx tsx ./src/settings/initializeTables.ts"
   },
   "repository": {
     "type": "git",
