@@ -28,7 +28,7 @@ export const createChat = async (req: Request, res: Response) => {
 };
 
 export const deleteChat = async (req: Request, res: Response) => {
-  const { id } = req.body;
+  const { id } = req.query;
 
   if (!id) {
     logger.error("ChatId is required");

@@ -22,6 +22,8 @@ export const verifyToken = async (
       "password | id"
     >;
 
+    console.log(decoded);
+
     req.user = {
       firstName: decoded.firstName,
       lastName: decoded.lastName,
