@@ -29,8 +29,6 @@ const runMigrations = async () => {
     }
   );
 
-  console.log(sortedByTimestampMigrationFiles);
-
   for (const file of sortedByTimestampMigrationFiles) {
     const migration = await import(path.resolve(migrationPath, file));
 
