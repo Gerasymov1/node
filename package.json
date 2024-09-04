@@ -8,7 +8,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon --watch src --exec npx tsx src/index.ts",
     "build": "tsc --project ./",
-    "create:tables": "npx tsx ./src/settings/initializeTables.ts"
+    "create:tables": "npx tsx ./src/settings/initializeTables.ts",
+    "create:migration": "npx tsx ./src/scripts/createMigration.ts",
+    "run:migration": "npx tsx ./src/scripts/runMigrations.ts"
   },
   "repository": {
     "type": "git",
