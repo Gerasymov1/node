@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import connection from "../settings/db";
-import { selectFromUsersQueryFirstAndLastName } from "../queries";
+import {
+  insertIntoUsers,
+  selectFromUsersQueryFirstAndLastName,
+  setRefreshToken,
+} from "../queries";
 import { User } from "../types";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -55,8 +59,6 @@ export const login = async (req: Request, res: Response) => {
     }
   );
 
-  const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
-
   const [result] = await connection.query(setRefreshToken, [
     refreshToken,
     user.id,
@@ -99,9 +101,7 @@ export const register = async (req: Request, res: Response) => {
     password: hash,
   };
 
-  const query = "INSERT INTO Users SET ?;";
-
-  const [result] = await connection.query(query, user);
+  const [result] = await connection.query(insertIntoUsers, user);
 
   const accessToken = jwt.sign(
     { firstName, lastName, id: (result as ExtendedQueryResult).insertId },
@@ -122,8 +122,6 @@ export const register = async (req: Request, res: Response) => {
       expiresIn: "7d",
     }
   );
-
-  const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
 
   const [refreshTokenResult] = await connection.execute(setRefreshToken, [
     refreshToken,
