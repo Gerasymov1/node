@@ -35,17 +35,25 @@ export const login = async (req: Request, res: Response) => {
     return res.status(401).send("Invalid password or first name/last name");
   }
 
-  const accessToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
-    expiresIn: "1h",
-  });
+  const accessToken = jwt.sign(
+    { firstName, lastName, id: user.id },
+    SECRET_KEY,
+    {
+      expiresIn: "1h",
+    }
+  );
 
   const refreshTokenExpiresAt = new Date();
 
   refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
-  const refreshToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
-    expiresIn: "7d",
-  });
+  const refreshToken = jwt.sign(
+    { firstName, lastName, id: user.id },
+    SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
 
   const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
 
@@ -95,17 +103,25 @@ export const register = async (req: Request, res: Response) => {
 
   const [result] = await connection.query(query, user);
 
-  const accessToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
-    expiresIn: "1h",
-  });
+  const accessToken = jwt.sign(
+    { firstName, lastName, id: (result as ExtendedQueryResult).insertId },
+    SECRET_KEY,
+    {
+      expiresIn: "1h",
+    }
+  );
 
   const refreshTokenExpiresAt = new Date();
 
   refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
-  const refreshToken = jwt.sign({ firstName, lastName }, SECRET_KEY, {
-    expiresIn: "7d",
-  });
+  const refreshToken = jwt.sign(
+    { firstName, lastName, id: (result as ExtendedQueryResult).insertId },
+    SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
 
   const setRefreshToken = `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?);`;
 

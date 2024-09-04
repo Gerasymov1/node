@@ -6,9 +6,11 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch src --exec 'npx tsx' src/index.ts",
+    "dev": "nodemon --watch src --exec npx tsx src/index.ts",
     "build": "tsc --project ./",
-    "create:tables": "ts-node --esm ./src/models/index.ts"
+    "create:tables": "npx tsx ./src/settings/initializeTables.ts",
+    "create:migration": "npx tsx ./src/scripts/createMigration.ts",
+    "run:migration": "npx tsx ./src/scripts/runMigrations.ts"
   },
   "repository": {
     "type": "git",
@@ -23,7 +25,8 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.0",
     "nodemon": "^3.1.4",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "winston": "^3.14.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
