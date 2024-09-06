@@ -7,11 +7,52 @@ import {
   updateChatQuery,
 } from "../queries";
 import logger from "../config/logger";
-import { User } from "../types";
+
+export const getChats = async (req: Request, res: Response) => {
+  const creatorId = req.user?.id;
+
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const search = req.query.search || "";
+
+  if (!creatorId) {
+    logger.info("CreatorId is required");
+    return res.status(400).json({ message: "CreatorId is required" });
+  }
+
+  const offset = (page - 1) * limit;
+
+  const query = `
+    SELECT * FROM chats
+    WHERE creatorId = ? AND (title LIKE ?)
+    ORDER BY createdAt DESC
+    LIMIT ? OFFSET ?;
+  `;
+
+  const searchPattern = `%${search}%`;
+
+  try {
+    const [chats]: any = await connection.query(query, [
+      creatorId,
+      searchPattern,
+      limit,
+      offset,
+    ]);
+
+    if (!chats.length) {
+      return res.status(404).json({ message: "Chats not found" });
+    }
+
+    res.status(200).json(chats);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 export const createChat = async (req: Request, res: Response) => {
   const { title } = req.body;
-  const { id: creatorId } = req.user as User;
+  const creatorId = req.user?.id;
 
   if (!title || !creatorId) {
     logger.info("Title and creatorId are required");

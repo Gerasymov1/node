@@ -2,17 +2,8 @@ import express from "express";
 import cookieParser from "cookie-parser";
 
 import router from "./routes/index.js";
-import { User } from "./types";
 import { handleSetHeaders } from "./middlewares";
 import { PORT } from "./constants";
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: Omit<User, "password">;
-    }
-  }
-}
 
 const app = express();
 
