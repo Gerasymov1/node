@@ -4,5 +4,5 @@ import { createChat, deleteChat, editChat } from "../../controllers";
 export const privateChatsRouter = Router();
 
 privateChatsRouter.post("/", createChat);
-privateChatsRouter.delete("/", deleteChat);
-privateChatsRouter.patch("/edit", editChat);
+privateChatsRouter.delete("/:id", deleteChat);
+privateChatsRouter.patch("/:id", editChat);

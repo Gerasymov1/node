@@ -26,7 +26,7 @@ export const verifyToken = async (
       firstName: decoded.firstName,
       lastName: decoded.lastName,
       id: decoded.id,
-    } as User;
+    };
 
     next();
   } catch (error) {

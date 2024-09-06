@@ -14,7 +14,7 @@ export const createChat = async (req: Request, res: Response) => {
   const { id: creatorId } = req.user as User;
 
   if (!title || !creatorId) {
-    logger.error("Title and creatorId are required");
+    logger.info("Title and creatorId are required");
     return res
       .status(400)
       .json({ message: "Title and creatorId are required" });
@@ -24,16 +24,16 @@ export const createChat = async (req: Request, res: Response) => {
     await connection.query(insertChatQuery, [title, creatorId]);
     res.status(201).json({ message: "Chat created" });
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 export const deleteChat = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
 
   if (!id) {
-    logger.error("ChatId is required");
+    logger.info("ChatId is required");
     return res.status(400).json({ message: "ChatId is required" });
   }
 
@@ -43,7 +43,7 @@ export const deleteChat = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Chat not found" });
     }
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     res.status(500).json({ message: "Server error" });
   }
 
@@ -51,16 +51,17 @@ export const deleteChat = async (req: Request, res: Response) => {
     await connection.query(deleteChatQuery, [id]);
     res.status(200).json({ message: "Chat deleted" });
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 export const editChat = async (req: Request, res: Response) => {
-  const { id, title } = req.body;
+  const { title } = req.body;
+  const { id } = req.params;
 
   if (!id || !title) {
-    logger.error("ChatId and title are required");
+    logger.info("ChatId and title are required");
     return res.status(400).json({ message: "ChatId and title are required" });
   }
 
@@ -70,7 +71,7 @@ export const editChat = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Chat not found" });
     }
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     res.status(500).json({ message: "Server error" });
   }
 
@@ -78,7 +79,7 @@ export const editChat = async (req: Request, res: Response) => {
     await connection.query(updateChatQuery, [title, id]);
     res.status(200).json({ message: "Chat updated" });
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };

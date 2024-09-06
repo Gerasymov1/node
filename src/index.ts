@@ -9,7 +9,7 @@ import { PORT } from "./constants";
 declare global {
   namespace Express {
     interface Request {
-      user?: Partial<User>;
+      user?: Omit<User, "password">;
     }
   }
 }

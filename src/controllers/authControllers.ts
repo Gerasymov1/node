@@ -10,6 +10,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../constants";
 import { QueryResult } from "mysql2";
+import logger from "../config/logger.ts";
 
 type ExtendedQueryResult = {
   insertId: number;
@@ -19,6 +20,7 @@ export const login = async (req: Request, res: Response) => {
   const { firstName, lastName, password } = req.body;
 
   if (!firstName || !lastName || !password) {
+    logger.info("Invalid request, fill in all fields");
     return res.status(400).send("Invalid request, fill in all fields");
   }
 
@@ -30,12 +32,14 @@ export const login = async (req: Request, res: Response) => {
   const user = rows[0] as User;
 
   if (!user) {
+    logger.info("User not found");
     return res.status(404).send("User not found");
   }
 
   const match = await bcrypt.compare(password, user.password);
 
   if (!match) {
+    logger.info("Invalid password or first name/last name");
     return res.status(401).send("Invalid password or first name/last name");
   }
 
@@ -66,6 +70,7 @@ export const login = async (req: Request, res: Response) => {
   ]);
 
   if ((result as ExtendedQueryResult).insertId === 0) {
+    logger.error("Error setting refresh token");
     return res.status(500).send("Error setting refresh token");
   }
 
@@ -88,6 +93,7 @@ export const register = async (req: Request, res: Response) => {
   ]);
 
   if ((rows as []).length > 0) {
+    logger.info("User already exists");
     return res.status(409).send("User already exists");
   }
 
@@ -130,6 +136,7 @@ export const register = async (req: Request, res: Response) => {
   ]);
 
   if (!refreshTokenResult) {
+    logger.error("Error setting refresh token");
     return res.status(500).send("Error setting refresh token");
   }
 
