@@ -72,6 +72,7 @@ export const createChat = async (req: Request, res: Response) => {
 
 export const deleteChat = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const creatorId = req.user?.id;
 
   if (!id) {
     logger.info("ChatId is required");
@@ -80,6 +81,10 @@ export const deleteChat = async (req: Request, res: Response) => {
 
   try {
     const [chat]: any = await connection.query(findChatQuery, [id]);
+    if (chat[0].creatorId !== creatorId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
     if (!chat.length) {
       return res.status(404).json({ message: "Chat not found" });
     }
@@ -100,6 +105,7 @@ export const deleteChat = async (req: Request, res: Response) => {
 export const editChat = async (req: Request, res: Response) => {
   const { title } = req.body;
   const { id } = req.params;
+  const creatorId = req.user?.id;
 
   if (!id || !title) {
     logger.info("ChatId and title are required");
@@ -108,6 +114,10 @@ export const editChat = async (req: Request, res: Response) => {
 
   try {
     const [chat]: any = await connection.query(findChatQuery, [id]);
+    if (chat[0].creatorId !== creatorId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
     if (!chat.length) {
       return res.status(404).json({ message: "Chat not found" });
     }
