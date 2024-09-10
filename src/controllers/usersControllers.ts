@@ -5,10 +5,10 @@ import { selectFromUsersQueryId, updateUserQuery } from "../queries";
 import logger from "../config/logger.ts";
 
 export const updateUser = async (req: Request, res: Response) => {
-  const { firstName, lastName, password } = req.body;
+  const { firstName, lastName, password, email } = req.body;
   const id = req.user?.id;
 
-  if (!firstName || !lastName || !password) {
+  if (!firstName || !lastName || !password || !email) {
     logger.info("Invalid request, fill in all fields");
     return res.status(400).send("Invalid request, fill in all fields");
   }
@@ -24,7 +24,13 @@ export const updateUser = async (req: Request, res: Response) => {
 
   const hash = await bcrypt.hash(password, saltRounds);
 
-  await connection.query(updateUserQuery, [firstName, lastName, hash, id]);
+  await connection.query(updateUserQuery, [
+    firstName,
+    lastName,
+    hash,
+    email,
+    id,
+  ]);
 
   res.status(204).send();
 };

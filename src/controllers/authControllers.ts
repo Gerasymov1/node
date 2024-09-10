@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import connection from "../settings/db";
 import {
   insertIntoUsers,
-  selectFromUsersQueryFirstAndLastName,
+  selectFromUsersQueryEmail,
   setRefreshToken,
 } from "../queries";
 import { User } from "../types";
@@ -17,17 +17,16 @@ type ExtendedQueryResult = {
 } & QueryResult;
 
 export const login = async (req: Request, res: Response) => {
-  const { firstName, lastName, password } = req.body;
+  const { firstName, lastName, password, email } = req.body;
 
-  if (!firstName || !lastName || !password) {
+  if (!password || !email) {
     logger.info("Invalid request, fill in all fields");
     return res.status(400).send("Invalid request, fill in all fields");
   }
 
-  const [rows]: any = await connection.query(
-    selectFromUsersQueryFirstAndLastName,
-    [firstName, lastName]
-  );
+  const [rows]: any = await connection.query(selectFromUsersQueryEmail, [
+    email,
+  ]);
 
   const user = rows[0] as User;
 
@@ -39,12 +38,12 @@ export const login = async (req: Request, res: Response) => {
   const match = await bcrypt.compare(password, user.password);
 
   if (!match) {
-    logger.info("Invalid password or first name/last name");
-    return res.status(401).send("Invalid password or first name/last name");
+    logger.info("Invalid password or email");
+    return res.status(401).send("Invalid password or email");
   }
 
   const accessToken = jwt.sign(
-    { firstName, lastName, id: user.id },
+    { firstName, lastName, id: user.id, email },
     SECRET_KEY,
     {
       expiresIn: "1h",
@@ -56,7 +55,7 @@ export const login = async (req: Request, res: Response) => {
   refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
   const refreshToken = jwt.sign(
-    { firstName, lastName, id: user.id },
+    { firstName, lastName, id: user.id, email },
     SECRET_KEY,
     {
       expiresIn: "7d",
@@ -85,12 +84,9 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { firstName, lastName, password } = req.body;
+  const { firstName, lastName, password, email } = req.body;
 
-  const [rows] = await connection.query(selectFromUsersQueryFirstAndLastName, [
-    firstName,
-    lastName,
-  ]);
+  const [rows] = await connection.query(selectFromUsersQueryEmail, [email]);
 
   if ((rows as []).length > 0) {
     logger.info("User already exists");
@@ -105,12 +101,18 @@ export const register = async (req: Request, res: Response) => {
     firstName,
     lastName,
     password: hash,
+    email,
   };
 
   const [result] = await connection.query(insertIntoUsers, user);
 
   const accessToken = jwt.sign(
-    { firstName, lastName, id: (result as ExtendedQueryResult).insertId },
+    {
+      firstName,
+      lastName,
+      id: (result as ExtendedQueryResult).insertId,
+      email,
+    },
     SECRET_KEY,
     {
       expiresIn: "1h",
@@ -122,7 +124,12 @@ export const register = async (req: Request, res: Response) => {
   refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
   const refreshToken = jwt.sign(
-    { firstName, lastName, id: (result as ExtendedQueryResult).insertId },
+    {
+      firstName,
+      lastName,
+      id: (result as ExtendedQueryResult).insertId,
+      email,
+    },
     SECRET_KEY,
     {
       expiresIn: "7d",
