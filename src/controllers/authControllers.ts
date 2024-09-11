@@ -1,16 +1,11 @@
 import { Request, Response } from "express";
-import connection from "../settings/db";
-import {
-  insertIntoUsers,
-  selectFromUsersQueryEmail,
-  setRefreshToken,
-} from "../queries";
-import { User } from "../types";
+import { createUser, findUserByEmail, insertRefreshToken } from "../queries";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../constants";
 import { QueryResult } from "mysql2";
 import logger from "../config/logger.ts";
+import { User } from "../types";
 
 type ExtendedQueryResult = {
   insertId: number;
@@ -24,11 +19,7 @@ export const login = async (req: Request, res: Response) => {
     return res.badRequest("Invalid request, fill in all fields");
   }
 
-  const [rows]: any = await connection.query(selectFromUsersQueryEmail, [
-    email,
-  ]);
-
-  const user = rows[0] as User;
+  const user = await findUserByEmail(email);
 
   if (!user) {
     logger.info("User not found");
@@ -62,11 +53,11 @@ export const login = async (req: Request, res: Response) => {
     }
   );
 
-  const [result] = await connection.query(setRefreshToken, [
+  const result = await insertRefreshToken(
     refreshToken,
     user.id,
-    refreshTokenExpiresAt,
-  ]);
+    refreshTokenExpiresAt
+  );
 
   if ((result as ExtendedQueryResult).insertId === 0) {
     logger.error("Error setting refresh token");
@@ -85,9 +76,9 @@ export const login = async (req: Request, res: Response) => {
 export const register = async (req: Request, res: Response) => {
   const { firstName, lastName, password, email } = req.body;
 
-  const [rows] = await connection.query(selectFromUsersQueryEmail, [email]);
+  const searchedUser = await findUserByEmail(email);
 
-  if ((rows as []).length > 0) {
+  if (!!searchedUser) {
     logger.info("User already exists");
     return res.conflict("User already exists");
   }
@@ -103,7 +94,7 @@ export const register = async (req: Request, res: Response) => {
     email,
   };
 
-  const [result] = await connection.query(insertIntoUsers, user);
+  const result = await createUser(user as User);
 
   const accessToken = jwt.sign(
     {
@@ -135,11 +126,11 @@ export const register = async (req: Request, res: Response) => {
     }
   );
 
-  const [refreshTokenResult] = await connection.execute(setRefreshToken, [
+  const refreshTokenResult = await insertRefreshToken(
     refreshToken,
     (result as ExtendedQueryResult).insertId,
-    refreshTokenExpiresAt,
-  ]);
+    refreshTokenExpiresAt
+  );
 
   if (!refreshTokenResult) {
     logger.error("Error setting refresh token");
