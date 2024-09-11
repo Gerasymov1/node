@@ -17,7 +17,7 @@ export const getChats = async (req: Request, res: Response) => {
 
   if (!creatorId) {
     logger.info("CreatorId is required");
-    return res.status(400).json({ message: "CreatorId is required" });
+    return res.badRequest("CreatorId is required");
   }
 
   const offset = (page - 1) * limit;
@@ -40,13 +40,13 @@ export const getChats = async (req: Request, res: Response) => {
     ]);
 
     if (!chats.length) {
-      return res.status(404).json({ message: "Chats not found" });
+      return res.notFound("Chats not found");
     }
 
-    res.status(200).json(chats);
+    res.success({ chats }, "Chats found");
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ message: "Server error" });
+    res.internalServerError("Server error");
   }
 };
 
@@ -56,17 +56,15 @@ export const createChat = async (req: Request, res: Response) => {
 
   if (!title || !creatorId) {
     logger.info("Title and creatorId are required");
-    return res
-      .status(400)
-      .json({ message: "Title and creatorId are required" });
+    return res.badRequest("Title and creatorId are required");
   }
 
   try {
     await connection.query(insertChatQuery, [title, creatorId]);
-    res.status(201).json({ message: "Chat created" });
+    res.created({ title }, "Chat created");
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ message: "Server error" });
+    res.internalServerError("Server error");
   }
 };
 
@@ -76,29 +74,29 @@ export const deleteChat = async (req: Request, res: Response) => {
 
   if (!id) {
     logger.info("ChatId is required");
-    return res.status(400).json({ message: "ChatId is required" });
+    return res.badRequest("ChatId is required");
   }
 
   try {
     const [chat]: any = await connection.query(findChatQuery, [id]);
     if (chat[0].creatorId !== creatorId) {
-      return res.status(403).json({ message: "Unauthorized" });
+      return res.permissionDenied("Permission denied");
     }
 
     if (!chat.length) {
-      return res.status(404).json({ message: "Chat not found" });
+      return res.unauthorized("Unauthorized");
     }
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ message: "Server error" });
+    res.internalServerError("Server error");
   }
 
   try {
     await connection.query(deleteChatQuery, [id]);
-    res.status(200).json({ message: "Chat deleted" });
+    res.success({}, "Chat deleted");
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ message: "Server error" });
+    res.internalServerError("Server error");
   }
 };
 
@@ -109,28 +107,28 @@ export const editChat = async (req: Request, res: Response) => {
 
   if (!id || !title) {
     logger.info("ChatId and title are required");
-    return res.status(400).json({ message: "ChatId and title are required" });
+    return res.badRequest("ChatId and title are required");
   }
 
   try {
     const [chat]: any = await connection.query(findChatQuery, [id]);
     if (chat[0].creatorId !== creatorId) {
-      return res.status(403).json({ message: "Unauthorized" });
+      return res.permissionDenied("Permission denied");
     }
 
     if (!chat.length) {
-      return res.status(404).json({ message: "Chat not found" });
+      return res.notFound("Chat not found");
     }
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ message: "Server error" });
+    res.internalServerError("Server error");
   }
 
   try {
     await connection.query(updateChatQuery, [title, id]);
-    res.status(200).json({ message: "Chat updated" });
+    res.success({ title }, "Chat updated");
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ message: "Server error" });
+    res.internalServerError("Server error");
   }
 };

@@ -21,7 +21,7 @@ export const login = async (req: Request, res: Response) => {
 
   if (!password || !email) {
     logger.info("Invalid request, fill in all fields");
-    return res.status(400).send("Invalid request, fill in all fields");
+    return res.badRequest("Invalid request, fill in all fields");
   }
 
   const [rows]: any = await connection.query(selectFromUsersQueryEmail, [
@@ -32,14 +32,14 @@ export const login = async (req: Request, res: Response) => {
 
   if (!user) {
     logger.info("User not found");
-    return res.status(404).send("User not found");
+    return res.notFound("User not found");
   }
 
   const match = await bcrypt.compare(password, user.password);
 
   if (!match) {
     logger.info("Invalid password or email");
-    return res.status(401).send("Invalid password or email");
+    return res.unauthorized("Invalid password or email");
   }
 
   const accessToken = jwt.sign(
@@ -70,7 +70,7 @@ export const login = async (req: Request, res: Response) => {
 
   if ((result as ExtendedQueryResult).insertId === 0) {
     logger.error("Error setting refresh token");
-    return res.status(500).send("Error setting refresh token");
+    return res.internalServerError("Error setting refresh token");
   }
 
   console.log("accessToken:", accessToken);
@@ -79,8 +79,7 @@ export const login = async (req: Request, res: Response) => {
   res
     .cookie("refreshToken", refreshToken)
     .cookie("accessToken", accessToken)
-    .status(201)
-    .send(user);
+    .success({ user }, "Logged in");
 };
 
 export const register = async (req: Request, res: Response) => {
@@ -90,7 +89,7 @@ export const register = async (req: Request, res: Response) => {
 
   if ((rows as []).length > 0) {
     logger.info("User already exists");
-    return res.status(409).send("User already exists");
+    return res.conflict("User already exists");
   }
 
   const saltRounds = 10;
@@ -144,7 +143,7 @@ export const register = async (req: Request, res: Response) => {
 
   if (!refreshTokenResult) {
     logger.error("Error setting refresh token");
-    return res.status(500).send("Error setting refresh token");
+    return res.internalServerError("Error setting refresh token");
   }
 
   console.log("accessToken:", accessToken);
@@ -153,6 +152,5 @@ export const register = async (req: Request, res: Response) => {
   res
     .cookie("refreshToken", refreshToken)
     .cookie("accessToken", accessToken)
-    .status(201)
-    .send(user);
+    .created({ user }, "User created");
 };

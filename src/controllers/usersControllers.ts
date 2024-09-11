@@ -10,14 +10,14 @@ export const updateUser = async (req: Request, res: Response) => {
 
   if (!firstName || !lastName || !password || !email) {
     logger.info("Invalid request, fill in all fields");
-    return res.status(400).send("Invalid request, fill in all fields");
+    return res.badRequest("Invalid request, fill in all fields");
   }
 
   const [rows] = await connection.execute(selectFromUsersQueryId, [id]);
 
   if ((rows as []).length === 0) {
     logger.info("User not found");
-    return res.status(404).send("User not found");
+    return res.notFound("User not found");
   }
 
   const saltRounds = 10;
