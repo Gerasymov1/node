@@ -10,3 +10,6 @@
 2024-09-11 05:28:23.719 PM [32minfo[39m: 	User not found
 2024-09-11 05:28:33.732 PM [32minfo[39m: 	User already exists
 2024-09-11 05:28:47.936 PM [32minfo[39m: 	User not found
+2024-09-11 06:23:54.648 PM [31merror[39m: 	Cannot read properties of undefined (reading 'creatorId')
+2024-09-11 06:23:54.655 PM [31merror[39m: 	Cannot set headers after they are sent to the client
+2024-09-11 06:25:17.104 PM [31merror[39m: 	Cannot read properties of undefined (reading 'creatorId')

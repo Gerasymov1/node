@@ -1,10 +1,10 @@
-import connection from "../settings/db";
 import { Request, Response } from "express";
 import {
-  deleteChatQuery,
-  findChatQuery,
-  insertChatQuery,
-  updateChatQuery,
+  createChat as createChatQuery,
+  deleteChat as deleteChatQuery,
+  findChat as findChatQuery,
+  getChats as getChatsQuery,
+  updateChat as updateChatQuery,
 } from "../queries";
 import logger from "../config/logger";
 
@@ -22,22 +22,15 @@ export const getChats = async (req: Request, res: Response) => {
 
   const offset = (page - 1) * limit;
 
-  const query = `
-    SELECT * FROM chats
-    WHERE creatorId = ? AND (title LIKE ?)
-    ORDER BY createdAt DESC
-    LIMIT ? OFFSET ?;
-  `;
-
   const searchPattern = `%${search}%`;
 
   try {
-    const [chats]: any = await connection.query(query, [
+    const chats: any = await getChatsQuery(
       creatorId,
       searchPattern,
       limit,
-      offset,
-    ]);
+      offset
+    );
 
     if (!chats.length) {
       return res.notFound("Chats not found");
@@ -60,7 +53,7 @@ export const createChat = async (req: Request, res: Response) => {
   }
 
   try {
-    await connection.query(insertChatQuery, [title, creatorId]);
+    await createChatQuery(title, creatorId);
     res.created({ title }, "Chat created");
   } catch (error) {
     logger.error(error);
@@ -78,13 +71,14 @@ export const deleteChat = async (req: Request, res: Response) => {
   }
 
   try {
-    const [chat]: any = await connection.query(findChatQuery, [id]);
-    if (chat[0].creatorId !== creatorId) {
-      return res.permissionDenied("Permission denied");
+    const chat: any = await findChatQuery(Number(id));
+
+    if (!chat) {
+      return res.notFound("Chat not found");
     }
 
-    if (!chat.length) {
-      return res.unauthorized("Unauthorized");
+    if (chat?.creatorId !== creatorId) {
+      return res.permissionDenied("Permission denied");
     }
   } catch (error) {
     logger.error(error);
@@ -92,7 +86,7 @@ export const deleteChat = async (req: Request, res: Response) => {
   }
 
   try {
-    await connection.query(deleteChatQuery, [id]);
+    await deleteChatQuery(Number(id));
     res.success({}, "Chat deleted");
   } catch (error) {
     logger.error(error);
@@ -111,13 +105,13 @@ export const editChat = async (req: Request, res: Response) => {
   }
 
   try {
-    const [chat]: any = await connection.query(findChatQuery, [id]);
-    if (chat[0].creatorId !== creatorId) {
-      return res.permissionDenied("Permission denied");
+    const chat: any = await findChatQuery(Number(id));
+    if (!chat) {
+      return res.notFound("Chat not found");
     }
 
-    if (!chat.length) {
-      return res.notFound("Chat not found");
+    if (chat?.creatorId !== creatorId) {
+      return res.permissionDenied("Permission denied");
     }
   } catch (error) {
     logger.error(error);
@@ -125,7 +119,7 @@ export const editChat = async (req: Request, res: Response) => {
   }
 
   try {
-    await connection.query(updateChatQuery, [title, id]);
+    await updateChatQuery(title, Number(id));
     res.success({ title }, "Chat updated");
   } catch (error) {
     logger.error(error);
