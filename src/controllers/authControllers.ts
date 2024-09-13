@@ -15,21 +15,39 @@ export const login = async (req: Request, res: Response) => {
   const { firstName, lastName, password, email } = req.body;
 
   if (!password || !email) {
-    logger.info("Invalid request, fill in all fields");
+    logger
+      .child({
+        childData: {
+          email,
+        },
+      })
+      .info("Invalid request, fill in all fields");
     return res.badRequest("Invalid request, fill in all fields");
   }
 
   const user = await findUserByEmail(email);
 
   if (!user) {
-    logger.info("User not found");
+    logger
+      .child({
+        childData: {
+          email,
+        },
+      })
+      .info("User not found");
     return res.notFound("User not found");
   }
 
   const match = await bcrypt.compare(password, user.password);
 
   if (!match) {
-    logger.info("Invalid password or email");
+    logger
+      .child({
+        childData: {
+          email,
+        },
+      })
+      .info("Invalid password or email");
     return res.unauthorized("Invalid password or email");
   }
 
@@ -60,7 +78,13 @@ export const login = async (req: Request, res: Response) => {
   );
 
   if ((result as ExtendedQueryResult).insertId === 0) {
-    logger.error("Error setting refresh token");
+    logger
+      .child({
+        childData: {
+          email,
+        },
+      })
+      .error("Error setting refresh token");
     return res.internalServerError("Error setting refresh token");
   }
 
@@ -79,7 +103,13 @@ export const register = async (req: Request, res: Response) => {
   const searchedUser = await findUserByEmail(email);
 
   if (!!searchedUser) {
-    logger.info("User already exists");
+    logger
+      .child({
+        childData: {
+          email,
+        },
+      })
+      .info("User already exists");
     return res.conflict("User already exists");
   }
 
@@ -133,7 +163,13 @@ export const register = async (req: Request, res: Response) => {
   );
 
   if (!refreshTokenResult) {
-    logger.error("Error setting refresh token");
+    logger
+      .child({
+        childData: {
+          email,
+        },
+      })
+      .error("Error setting refresh token");
     return res.internalServerError("Error setting refresh token");
   }
 

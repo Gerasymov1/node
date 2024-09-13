@@ -2,8 +2,9 @@ import winston from "winston";
 
 const { combine, timestamp, printf, colorize, align } = winston.format;
 
-const myFormat = printf(({ level, message, timestamp }) => {
-  return `${timestamp} ${level}: ${message}`;
+const myFormat = printf(({ level, message, timestamp, childData }) => {
+  console.log(level, message, timestamp, childData);
+  return `${timestamp} ${level}: ${childData} ${message}`;
 });
 
 const logger = winston.createLogger({
@@ -17,9 +18,8 @@ const logger = winston.createLogger({
     myFormat
   ),
   transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/error.log", level: "error" }),
-    new winston.transports.File({ filename: "logs/info.log", level: "info" }),
+    new winston.transports.Console({ level: "error" }),
+    new winston.transports.Console({ level: "info" }),
   ],
 });
 
