@@ -3,6 +3,7 @@ import { createChatsTable } from "../models/chats.ts";
 import { createMessagesTable } from "../models/messages.ts";
 import { createUsersChatsTable } from "../models/usersChats.ts";
 import { createRefreshTokensTable } from "../models/refreshTokens.ts";
+import { createMigrationsTable } from "../models/createMigrationsTable.ts";
 
 const initializeTables = async () => {
   await createUsersTable();
@@ -10,6 +11,7 @@ const initializeTables = async () => {
   await createMessagesTable();
   await createUsersChatsTable();
   await createRefreshTokensTable();
+  await createMigrationsTable();
 };
 
 initializeTables()
