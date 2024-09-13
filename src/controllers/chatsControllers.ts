@@ -103,16 +103,7 @@ export const deleteChat = async (req: Request, res: Response) => {
     if (chat?.creatorId !== creatorId) {
       return res.permissionDenied("Permission denied");
     }
-  } catch (error) {
-    logger
-      .child({
-        childData: { chatId: id, creatorId },
-      })
-      .error(error);
-    res.internalServerError("Server error");
-  }
 
-  try {
     await deleteChatQuery(Number(id));
     res.success({}, "Chat deleted");
   } catch (error) {
@@ -148,16 +139,7 @@ export const editChat = async (req: Request, res: Response) => {
     if (chat?.creatorId !== creatorId) {
       return res.permissionDenied("Permission denied");
     }
-  } catch (error) {
-    logger
-      .child({
-        childData: { chatId: id, title, creatorId },
-      })
-      .error(error);
-    res.internalServerError("Server error");
-  }
 
-  try {
     await updateChatQuery(title, Number(id));
     res.success({ title }, "Chat updated");
   } catch (error) {
