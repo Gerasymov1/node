@@ -1,30 +1,29 @@
-import connection from "../settings/db";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import { selectFromUsersQueryId, updateUserQuery } from "../queries";
+import { findUserById, updateUser as updateUserQuery } from "../queries";
 import logger from "../config/logger.ts";
 
 export const updateUser = async (req: Request, res: Response) => {
-  const { firstName, lastName, password } = req.body;
+  const { firstName, lastName, password, email } = req.body;
   const id = req.user?.id;
 
-  if (!firstName || !lastName || !password) {
+  if (!firstName || !lastName || !password || !email) {
     logger.info("Invalid request, fill in all fields");
-    return res.status(400).send("Invalid request, fill in all fields");
+    return res.badRequest("Invalid request, fill in all fields");
   }
 
-  const [rows] = await connection.execute(selectFromUsersQueryId, [id]);
+  const result = await findUserById(id);
 
-  if ((rows as []).length === 0) {
+  if (!result) {
     logger.info("User not found");
-    return res.status(404).send("User not found");
+    return res.notFound("User not found");
   }
 
   const saltRounds = 10;
 
   const hash = await bcrypt.hash(password, saltRounds);
 
-  await connection.query(updateUserQuery, [firstName, lastName, hash, id]);
+  await updateUserQuery(firstName, lastName, hash, email, id);
 
   res.status(204).send();
 };

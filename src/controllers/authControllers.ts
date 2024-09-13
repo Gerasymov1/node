@@ -1,50 +1,40 @@
 import { Request, Response } from "express";
-import connection from "../settings/db";
-import {
-  insertIntoUsers,
-  selectFromUsersQueryFirstAndLastName,
-  setRefreshToken,
-} from "../queries";
-import { User } from "../types";
+import { createUser, findUserByEmail, insertRefreshToken } from "../queries";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../constants";
 import { QueryResult } from "mysql2";
 import logger from "../config/logger.ts";
+import { User } from "../types";
 
 type ExtendedQueryResult = {
   insertId: number;
 } & QueryResult;
 
 export const login = async (req: Request, res: Response) => {
-  const { firstName, lastName, password } = req.body;
+  const { firstName, lastName, password, email } = req.body;
 
-  if (!firstName || !lastName || !password) {
+  if (!password || !email) {
     logger.info("Invalid request, fill in all fields");
-    return res.status(400).send("Invalid request, fill in all fields");
+    return res.badRequest("Invalid request, fill in all fields");
   }
 
-  const [rows]: any = await connection.query(
-    selectFromUsersQueryFirstAndLastName,
-    [firstName, lastName]
-  );
-
-  const user = rows[0] as User;
+  const user = await findUserByEmail(email);
 
   if (!user) {
     logger.info("User not found");
-    return res.status(404).send("User not found");
+    return res.notFound("User not found");
   }
 
   const match = await bcrypt.compare(password, user.password);
 
   if (!match) {
-    logger.info("Invalid password or first name/last name");
-    return res.status(401).send("Invalid password or first name/last name");
+    logger.info("Invalid password or email");
+    return res.unauthorized("Invalid password or email");
   }
 
   const accessToken = jwt.sign(
-    { firstName, lastName, id: user.id },
+    { firstName, lastName, id: user.id, email },
     SECRET_KEY,
     {
       expiresIn: "1h",
@@ -56,22 +46,22 @@ export const login = async (req: Request, res: Response) => {
   refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
   const refreshToken = jwt.sign(
-    { firstName, lastName, id: user.id },
+    { firstName, lastName, id: user.id, email },
     SECRET_KEY,
     {
       expiresIn: "7d",
     }
   );
 
-  const [result] = await connection.query(setRefreshToken, [
+  const result = await insertRefreshToken(
     refreshToken,
     user.id,
-    refreshTokenExpiresAt,
-  ]);
+    refreshTokenExpiresAt
+  );
 
   if ((result as ExtendedQueryResult).insertId === 0) {
     logger.error("Error setting refresh token");
-    return res.status(500).send("Error setting refresh token");
+    return res.internalServerError("Error setting refresh token");
   }
 
   console.log("accessToken:", accessToken);
@@ -80,21 +70,17 @@ export const login = async (req: Request, res: Response) => {
   res
     .cookie("refreshToken", refreshToken)
     .cookie("accessToken", accessToken)
-    .status(201)
-    .send(user);
+    .success({ user }, "Logged in");
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { firstName, lastName, password } = req.body;
+  const { firstName, lastName, password, email } = req.body;
 
-  const [rows] = await connection.query(selectFromUsersQueryFirstAndLastName, [
-    firstName,
-    lastName,
-  ]);
+  const searchedUser = await findUserByEmail(email);
 
-  if ((rows as []).length > 0) {
+  if (!!searchedUser) {
     logger.info("User already exists");
-    return res.status(409).send("User already exists");
+    return res.conflict("User already exists");
   }
 
   const saltRounds = 10;
@@ -105,12 +91,18 @@ export const register = async (req: Request, res: Response) => {
     firstName,
     lastName,
     password: hash,
+    email,
   };
 
-  const [result] = await connection.query(insertIntoUsers, user);
+  const result = await createUser(user as User);
 
   const accessToken = jwt.sign(
-    { firstName, lastName, id: (result as ExtendedQueryResult).insertId },
+    {
+      firstName,
+      lastName,
+      id: (result as ExtendedQueryResult).insertId,
+      email,
+    },
     SECRET_KEY,
     {
       expiresIn: "1h",
@@ -122,22 +114,27 @@ export const register = async (req: Request, res: Response) => {
   refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
 
   const refreshToken = jwt.sign(
-    { firstName, lastName, id: (result as ExtendedQueryResult).insertId },
+    {
+      firstName,
+      lastName,
+      id: (result as ExtendedQueryResult).insertId,
+      email,
+    },
     SECRET_KEY,
     {
       expiresIn: "7d",
     }
   );
 
-  const [refreshTokenResult] = await connection.execute(setRefreshToken, [
+  const refreshTokenResult = await insertRefreshToken(
     refreshToken,
     (result as ExtendedQueryResult).insertId,
-    refreshTokenExpiresAt,
-  ]);
+    refreshTokenExpiresAt
+  );
 
   if (!refreshTokenResult) {
     logger.error("Error setting refresh token");
-    return res.status(500).send("Error setting refresh token");
+    return res.internalServerError("Error setting refresh token");
   }
 
   console.log("accessToken:", accessToken);
@@ -146,6 +143,5 @@ export const register = async (req: Request, res: Response) => {
   res
     .cookie("refreshToken", refreshToken)
     .cookie("accessToken", accessToken)
-    .status(201)
-    .send(user);
+    .created({ user }, "User created");
 };

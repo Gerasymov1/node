@@ -12,8 +12,8 @@ export const verifyToken = async (
   const accessToken = req.cookies.accessToken;
   const refreshToken = req.cookies.refreshToken;
 
-  if (!accessToken && !refreshToken) {
-    return res.status(401).send("Unauthorized");
+  if (!accessToken.length && !refreshToken.length) {
+    return res.unauthorized("Unauthorized");
   }
 
   try {
@@ -26,14 +26,15 @@ export const verifyToken = async (
       firstName: decoded.firstName,
       lastName: decoded.lastName,
       id: decoded.id,
+      email: decoded.email,
     };
 
     next();
   } catch (error) {
     if (!refreshToken) {
-      return res.status(401).send("Access Denied. No refresh token provided.");
+      return res.permissionDenied("Permission denied");
     }
 
-    return res.status(401).send("Unauthorized");
+    return res.unauthorized("Unauthorized");
   }
 };
