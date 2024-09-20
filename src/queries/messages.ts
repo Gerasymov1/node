@@ -51,3 +51,35 @@ export const editMessage = async (
 
   return result;
 };
+
+export const getMessageById = async (id: number) => {
+  const [result] = await connection.query(
+    "SELECT * FROM Messages WHERE id = ?",
+    [id]
+  );
+
+  return result;
+};
+
+export const forwardMessage = async (
+  text: string,
+  chatId: number,
+  creatorId: number,
+  repliedMessageId: number,
+  forwardedChatId: number,
+  forwardedFromUserId: number
+) => {
+  const [result] = await connection.query(
+    "INSERT INTO Messages (text, chatId, creatorId, repliedMessageId, forwardedChatId, forwardedFromUserId) VALUES (?, ?, ?, ?, ?, ?)",
+    [
+      text,
+      chatId,
+      creatorId,
+      repliedMessageId,
+      forwardedChatId,
+      forwardedFromUserId,
+    ]
+  );
+
+  return result;
+};

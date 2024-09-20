@@ -5,6 +5,8 @@ import {
   getMessagesByChatId as getMessagesByChatIdQuery,
   deleteMessage as deleteMessageQuery,
   editMessage as editMessageQuery,
+  getMessageById as getMessageByIdQuery,
+  forwardMessage as forwardMessageQuery,
 } from "../queries/messages.ts";
 
 export const createMessage = async (req: Request, res: Response) => {
@@ -120,6 +122,64 @@ export const editMessage = async (req: Request, res: Response) => {
     }
 
     res.success({}, "Message edited");
+  } catch (error) {
+    res.internalServerError("Server error");
+  }
+};
+
+export const getMessageById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) {
+    logger.child({
+      childData: {
+        id,
+      },
+    });
+
+    return res.badRequest("Id is required");
+  }
+
+  try {
+    const message: any = await getMessageByIdQuery(Number(id));
+
+    if (!message.length) {
+      return res.notFound("Message not found");
+    }
+
+    res.success({ message }, "Message retrieved");
+  } catch (error) {
+    res.internalServerError("Server error");
+  }
+};
+
+export const forwardMessage = async (req: Request, res: Response) => {
+  const { text, forwardedChatId, forwardedFromUserId } = req.body;
+  const { chatId, id: repliedMessageId } = req.params;
+  const creatorId = req.user?.id;
+
+  if (!chatId || !text || !creatorId) {
+    logger.child({
+      childData: {
+        chatId,
+        text,
+        creatorId,
+      },
+    });
+
+    return res.badRequest("ChatId, text and creatorId are required");
+  }
+
+  try {
+    await forwardMessageQuery(
+      text,
+      Number(chatId),
+      creatorId,
+      Number(repliedMessageId),
+      forwardedChatId,
+      forwardedFromUserId
+    );
+    res.created({ chatId, text }, "Message forwarded");
   } catch (error) {
     res.internalServerError("Server error");
   }
