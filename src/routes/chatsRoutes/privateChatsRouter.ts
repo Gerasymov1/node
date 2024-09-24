@@ -6,7 +6,6 @@ import {
   deleteMessage,
   editMessage,
   getMessagesByChatId,
-  getMessageById,
   forwardMessage,
 } from "../../controllers/messagesControllers.ts";
 
@@ -23,5 +22,4 @@ privateMessagesRouter.get("/", getMessagesByChatId);
 privateMessagesRouter.post("/", createMessage);
 privateMessagesRouter.delete("/:id", deleteMessage);
 privateMessagesRouter.patch("/:id", editMessage);
-privateMessagesRouter.get("/:id", getMessageById);
 privateMessagesRouter.post("/:id/forward", forwardMessage);
