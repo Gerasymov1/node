@@ -15,14 +15,29 @@ export const createMessage = async (
 
 export const getMessagesByChatId = async (
   chatId: number,
-  creatorId: number
+  creatorId: number,
+  search: string,
+  limit: number,
+  offset: number
 ) => {
-  const [result] = await connection.query(
-    "SELECT * FROM Messages WHERE chatId = ? AND creatorId = ?",
-    [chatId, creatorId]
-  );
+  const query = `
+    SELECT * FROM Messages
+    WHERE chatId = ? AND creatorId = ? AND (text LIKE ?)
+    ORDER BY createdAt DESC
+    LIMIT ? OFFSET ?;
+  `;
 
-  return result;
+  const searchPattern = `%${search}%`;
+
+  const [messages]: any = await connection.query(query, [
+    chatId,
+    creatorId,
+    searchPattern,
+    limit,
+    offset,
+  ]);
+
+  return messages;
 };
 
 export const deleteMessage = async (

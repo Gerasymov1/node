@@ -38,6 +38,10 @@ export const getMessagesByChatId = async (req: Request, res: Response) => {
   const { chatId } = req.params;
   const creatorId = req.user?.id;
 
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const search = req.query.search || "";
+
   if (!chatId) {
     logger.child({
       childData: {
@@ -49,8 +53,17 @@ export const getMessagesByChatId = async (req: Request, res: Response) => {
     return res.badRequest("ChatId is required");
   }
 
+  const offset = (page - 1) * limit;
+  const searchPattern = `%${search}%`;
+
   try {
-    const messages = await getMessagesByChatIdQuery(Number(chatId), creatorId);
+    const messages = await getMessagesByChatIdQuery(
+      Number(chatId),
+      creatorId,
+      searchPattern,
+      limit,
+      offset
+    );
 
     res.success({ messages }, "Messages retrieved");
   } catch (error) {
