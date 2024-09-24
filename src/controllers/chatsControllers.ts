@@ -16,7 +16,7 @@ export const getChats = async (req: Request, res: Response) => {
   const search = req.query.search || "";
 
   if (!creatorId) {
-    logger.info("CreatorId is required");
+    logger.child({ childData: { creatorId } }).info("CreatorId is required");
     return res.badRequest("CreatorId is required");
   }
 
@@ -32,13 +32,18 @@ export const getChats = async (req: Request, res: Response) => {
       offset
     );
 
-    if (!chats.length) {
-      return res.notFound("Chats not found");
-    }
-
     res.success({ chats }, "Chats found");
   } catch (error) {
-    logger.error(error);
+    logger
+      .child({
+        childData: {
+          creatorId,
+          searchPattern,
+          limit,
+          offset,
+        },
+      })
+      .error(error);
     res.internalServerError("Server error");
   }
 };
@@ -48,7 +53,14 @@ export const createChat = async (req: Request, res: Response) => {
   const creatorId = req.user?.id;
 
   if (!title || !creatorId) {
-    logger.info("Title and creatorId are required");
+    logger
+      .child({
+        childData: {
+          title,
+          creatorId,
+        },
+      })
+      .info("Title and creatorId are required");
     return res.badRequest("Title and creatorId are required");
   }
 
@@ -56,7 +68,14 @@ export const createChat = async (req: Request, res: Response) => {
     await createChatQuery(title, creatorId);
     res.created({ title }, "Chat created");
   } catch (error) {
-    logger.error(error);
+    logger
+      .child({
+        childData: {
+          title,
+          creatorId,
+        },
+      })
+      .error(error);
     res.internalServerError("Server error");
   }
 };
@@ -66,7 +85,11 @@ export const deleteChat = async (req: Request, res: Response) => {
   const creatorId = req.user?.id;
 
   if (!id) {
-    logger.info("ChatId is required");
+    logger
+      .child({
+        childData: { chatId: id, creatorId },
+      })
+      .info("ChatId is required");
     return res.badRequest("ChatId is required");
   }
 
@@ -80,16 +103,15 @@ export const deleteChat = async (req: Request, res: Response) => {
     if (chat?.creatorId !== creatorId) {
       return res.permissionDenied("Permission denied");
     }
-  } catch (error) {
-    logger.error(error);
-    res.internalServerError("Server error");
-  }
 
-  try {
     await deleteChatQuery(Number(id));
     res.success({}, "Chat deleted");
   } catch (error) {
-    logger.error(error);
+    logger
+      .child({
+        childData: { chatId: id, creatorId },
+      })
+      .error(error);
     res.internalServerError("Server error");
   }
 };
@@ -100,7 +122,11 @@ export const editChat = async (req: Request, res: Response) => {
   const creatorId = req.user?.id;
 
   if (!id || !title) {
-    logger.info("ChatId and title are required");
+    logger
+      .child({
+        childData: { chatId: id, title, creatorId },
+      })
+      .info("ChatId and title are required");
     return res.badRequest("ChatId and title are required");
   }
 
@@ -113,16 +139,15 @@ export const editChat = async (req: Request, res: Response) => {
     if (chat?.creatorId !== creatorId) {
       return res.permissionDenied("Permission denied");
     }
-  } catch (error) {
-    logger.error(error);
-    res.internalServerError("Server error");
-  }
 
-  try {
     await updateChatQuery(title, Number(id));
     res.success({ title }, "Chat updated");
   } catch (error) {
-    logger.error(error);
+    logger
+      .child({
+        childData: { chatId: id, title, creatorId },
+      })
+      .error(error);
     res.internalServerError("Server error");
   }
 };

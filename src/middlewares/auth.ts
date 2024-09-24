@@ -12,7 +12,7 @@ export const verifyToken = async (
   const accessToken = req.cookies.accessToken;
   const refreshToken = req.cookies.refreshToken;
 
-  if (!accessToken.length && !refreshToken.length) {
+  if (!accessToken?.length && !refreshToken?.length) {
     return res.unauthorized("Unauthorized");
   }
 

@@ -8,14 +8,26 @@ export const updateUser = async (req: Request, res: Response) => {
   const id = req.user?.id;
 
   if (!firstName || !lastName || !password || !email) {
-    logger.info("Invalid request, fill in all fields");
+    logger
+      .child({
+        childData: {
+          email,
+        },
+      })
+      .info("Invalid request, fill in all fields");
     return res.badRequest("Invalid request, fill in all fields");
   }
 
   const result = await findUserById(id);
 
   if (!result) {
-    logger.info("User not found");
+    logger
+      .child({
+        childData: {
+          email,
+        },
+      })
+      .info("User not found");
     return res.notFound("User not found");
   }
 
