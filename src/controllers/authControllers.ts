@@ -1,18 +1,17 @@
 import { Request, Response } from "express";
-import { createUser, findUserByEmail, insertRefreshToken } from "../queries";
+import { createUser, findUserByEmail } from "../queries";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { SECRET_KEY } from "../constants";
 import { QueryResult } from "mysql2";
 import logger from "../config/logger.ts";
 import { User } from "../types";
+import { generateTokens } from "../middlewares";
 
 type ExtendedQueryResult = {
   insertId: number;
 } & QueryResult;
 
 export const login = async (req: Request, res: Response) => {
-  const { firstName, lastName, password, email } = req.body;
+  const { password, email } = req.body;
 
   if (!password || !email) {
     logger
@@ -51,33 +50,9 @@ export const login = async (req: Request, res: Response) => {
     return res.unauthorized("Invalid password or email");
   }
 
-  const accessToken = jwt.sign(
-    { firstName, lastName, id: user.id, email },
-    SECRET_KEY,
-    {
-      expiresIn: "1h",
-    }
-  );
+  const { accessToken, refreshToken } = await generateTokens(user.id);
 
-  const refreshTokenExpiresAt = new Date();
-
-  refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
-
-  const refreshToken = jwt.sign(
-    { firstName, lastName, id: user.id, email },
-    SECRET_KEY,
-    {
-      expiresIn: "7d",
-    }
-  );
-
-  const result = await insertRefreshToken(
-    refreshToken,
-    user.id,
-    refreshTokenExpiresAt
-  );
-
-  if ((result as ExtendedQueryResult).insertId === 0) {
+  if (!accessToken || !refreshToken) {
     logger
       .child({
         childData: {
@@ -87,9 +62,6 @@ export const login = async (req: Request, res: Response) => {
       .error("Error setting refresh token");
     return res.internalServerError("Error setting refresh token");
   }
-
-  console.log("accessToken:", accessToken);
-  console.log("refreshToken:", refreshToken);
 
   res
     .cookie("refreshToken", refreshToken)
@@ -126,58 +98,16 @@ export const register = async (req: Request, res: Response) => {
 
   const result = await createUser(user as User);
 
-  const accessToken = jwt.sign(
-    {
-      firstName,
-      lastName,
-      id: (result as ExtendedQueryResult).insertId,
-      email,
-    },
-    SECRET_KEY,
-    {
-      expiresIn: "1h",
-    }
-  );
-
-  const refreshTokenExpiresAt = new Date();
-
-  refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
-
-  const refreshToken = jwt.sign(
-    {
-      firstName,
-      lastName,
-      id: (result as ExtendedQueryResult).insertId,
-      email,
-    },
-    SECRET_KEY,
-    {
-      expiresIn: "7d",
-    }
-  );
-
-  const refreshTokenResult = await insertRefreshToken(
-    refreshToken,
-    (result as ExtendedQueryResult).insertId,
-    refreshTokenExpiresAt
-  );
-
-  if (!refreshTokenResult) {
+  if ((result as ExtendedQueryResult).insertId === 0) {
     logger
       .child({
         childData: {
           email,
         },
       })
-      .error("Error setting refresh token");
-    return res.internalServerError("Error setting refresh token");
+      .error("Error creating user");
+    return res.internalServerError("Error creating user");
   }
 
-  console.log("accessToken:", accessToken);
-  console.log("refreshToken:", refreshToken);
-
-  res
-    .cookie("refreshToken", refreshToken)
-    .cookie("accessToken", accessToken)
-    .created({ user }, "User created");
+  res.created({ user }, "User created");
 };
