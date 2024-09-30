@@ -38,6 +38,10 @@ export const getMessagesByChatId = async (req: Request, res: Response) => {
   const { chatId } = req.params;
   const creatorId = req.user?.id;
 
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const search = req.query.search || "";
+
   if (!chatId) {
     logger.child({
       childData: {
@@ -49,8 +53,17 @@ export const getMessagesByChatId = async (req: Request, res: Response) => {
     return res.badRequest("ChatId is required");
   }
 
+  const offset = (page - 1) * limit;
+  const searchPattern = `%${search}%`;
+
   try {
-    const messages = await getMessagesByChatIdQuery(Number(chatId), creatorId);
+    const messages = await getMessagesByChatIdQuery(
+      Number(chatId),
+      creatorId,
+      searchPattern,
+      limit,
+      offset
+    );
 
     res.success({ messages }, "Messages retrieved");
   } catch (error) {
@@ -127,42 +140,14 @@ export const editMessage = async (req: Request, res: Response) => {
   }
 };
 
-export const getMessageById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  if (!id) {
-    logger.child({
-      childData: {
-        id,
-      },
-    });
-
-    return res.badRequest("Id is required");
-  }
-
-  try {
-    const message: any = await getMessageByIdQuery(Number(id));
-
-    if (!message.length) {
-      return res.notFound("Message not found");
-    }
-
-    res.success({ message }, "Message retrieved");
-  } catch (error) {
-    res.internalServerError("Server error");
-  }
-};
-
 export const forwardMessage = async (req: Request, res: Response) => {
-  const { text, forwardedChatId, forwardedFromUserId } = req.body;
   const { chatId, id: repliedMessageId } = req.params;
   const creatorId = req.user?.id;
 
-  if (!chatId || !text || !creatorId) {
+  if (!chatId) {
     logger.child({
       childData: {
         chatId,
-        text,
         creatorId,
       },
     });
@@ -171,15 +156,28 @@ export const forwardMessage = async (req: Request, res: Response) => {
   }
 
   try {
-    await forwardMessageQuery(
-      text,
+    const message: any = await getMessageByIdQuery(Number(repliedMessageId));
+
+    if (!message.length) {
+      return res.notFound("Message not found");
+    }
+
+    const repliedMessage = message[0];
+
+    const result = await forwardMessageQuery(
+      repliedMessage.text,
       Number(chatId),
       creatorId,
       Number(repliedMessageId),
-      forwardedChatId,
-      forwardedFromUserId
+      repliedMessage.chatId,
+      repliedMessage.creatorId
     );
-    res.created({ chatId, text }, "Message forwarded");
+
+    if ((result as any).affectedRows === 0) {
+      return res.notFound("Message has not been forwarded");
+    }
+
+    res.created({ chatId, text: repliedMessage.text }, "Message forwarded");
   } catch (error) {
     res.internalServerError("Server error");
   }
