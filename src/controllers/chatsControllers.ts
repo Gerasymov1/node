@@ -5,6 +5,7 @@ import {
   findChat as findChatQuery,
   getChats as getChatsQuery,
   updateChat as updateChatQuery,
+  inviteUserToChat as inviteUserToChatQuery,
 } from "../queries";
 import logger from "../config/logger";
 
@@ -159,6 +160,45 @@ export const editChat = async (req: Request, res: Response) => {
       .error(error);
 
     console.error("Error updating chat", error);
+
+    res.internalServerError("Server error");
+  }
+};
+
+export const inviteUserToChat = async (req: Request, res: Response) => {
+  const { userId } = req.body;
+  const { id: chatId } = req.params;
+  const creatorId = req.user?.id;
+
+  if (!chatId || !userId) {
+    logger
+      .child({
+        childData: { chatId, userId, creatorId },
+      })
+      .info("ChatId and userId are required");
+    return res.badRequest("ChatId and userId are required");
+  }
+
+  try {
+    const chat: any = await findChatQuery(Number(chatId));
+    if (!chat) {
+      return res.notFound("Chat not found");
+    }
+
+    if (chat?.creatorId !== creatorId) {
+      return res.permissionDenied("Permission denied");
+    }
+
+    await inviteUserToChatQuery(Number(chatId), userId);
+    res.success({}, "User invited to chat");
+  } catch (error) {
+    logger
+      .child({
+        childData: { chatId, userId, creatorId },
+      })
+      .error(error);
+
+    console.error("Error inviting user to chat", error);
 
     res.internalServerError("Server error");
   }
