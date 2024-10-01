@@ -45,7 +45,7 @@ export const getChats = async (req: Request, res: Response) => {
       })
       .error(error);
 
-    console.log("Error getting chats", error);
+    console.error("Error getting chats", error);
 
     res.internalServerError("Server error");
   }
@@ -80,7 +80,7 @@ export const createChat = async (req: Request, res: Response) => {
       })
       .error(error);
 
-    console.log("Error creating chat", error);
+    console.error("Error creating chat", error);
 
     res.internalServerError("Server error");
   }
@@ -119,7 +119,7 @@ export const deleteChat = async (req: Request, res: Response) => {
       })
       .error(error);
 
-    console.log("Error deleting chat", error);
+    console.error("Error deleting chat", error);
 
     res.internalServerError("Server error");
   }
@@ -158,7 +158,7 @@ export const editChat = async (req: Request, res: Response) => {
       })
       .error(error);
 
-    console.log("Error updating chat", error);
+    console.error("Error updating chat", error);
 
     res.internalServerError("Server error");
   }
