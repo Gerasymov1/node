@@ -67,7 +67,10 @@ export const login = async (req: Request, res: Response) => {
     res
       .cookie("refreshToken", refreshToken)
       .cookie("accessToken", accessToken)
-      .success({ user }, "Logged in");
+      .success(
+        { user: { firstName: user.firstName, lastName: user.lastName, email } },
+        "Logged in"
+      );
   } catch (error) {
     logger
       .child({
@@ -76,6 +79,9 @@ export const login = async (req: Request, res: Response) => {
         },
       })
       .error("Error logging in");
+
+    console.error("Error logging in", error);
+
     return res.internalServerError("Error logging in");
   }
 };
@@ -132,7 +138,7 @@ export const register = async (req: Request, res: Response) => {
       return res.internalServerError("Error creating user");
     }
 
-    res.created({ user }, "User created");
+    res.created({ user: { firstName, lastName, email } }, "User created");
   } catch (error) {
     logger
       .child({
@@ -141,6 +147,9 @@ export const register = async (req: Request, res: Response) => {
         },
       })
       .error("Error creating user");
+
+    console.error("Error creating user", error);
+
     return res.internalServerError("Error creating user");
   }
 };
