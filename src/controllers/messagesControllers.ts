@@ -72,7 +72,6 @@ export const getMessagesByChatId = async (req: Request, res: Response) => {
   try {
     const messages = await getMessagesByChatIdQuery(
       Number(chatId),
-      creatorId,
       searchPattern,
       limit,
       offset
