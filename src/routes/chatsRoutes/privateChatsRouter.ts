@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { createChat, deleteChat, editChat, getChats } from "../../controllers";
+import {
+  createChat,
+  deleteChat,
+  editChat,
+  getChats,
+  inviteUserToChat,
+} from "../../controllers";
 import { privateMessagesRouter } from "../messagesRoutes/privateMessagesRouter.ts";
 import {
   createMessage,
@@ -15,6 +21,7 @@ privateChatsRouter.get("/", getChats);
 privateChatsRouter.post("/", createChat);
 privateChatsRouter.delete("/:id", deleteChat);
 privateChatsRouter.patch("/:id", editChat);
+privateChatsRouter.post("/:id/invite", inviteUserToChat);
 
 privateChatsRouter.use("/:chatId/messages", privateMessagesRouter);
 

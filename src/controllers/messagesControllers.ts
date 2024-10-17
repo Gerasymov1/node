@@ -30,6 +30,19 @@ export const createMessage = async (req: Request, res: Response) => {
     await createMessageQuery(Number(chatId), text, creatorId);
     res.created({ chatId, text }, "Message created");
   } catch (error) {
+    logger
+      .child({
+        childData: {
+          chatId,
+          text,
+          creatorId,
+          error,
+        },
+      })
+      .error(error);
+
+    console.error("Error creating message:", error);
+
     res.internalServerError("Server error");
   }
 };
@@ -59,7 +72,6 @@ export const getMessagesByChatId = async (req: Request, res: Response) => {
   try {
     const messages = await getMessagesByChatIdQuery(
       Number(chatId),
-      creatorId,
       searchPattern,
       limit,
       offset
@@ -67,6 +79,18 @@ export const getMessagesByChatId = async (req: Request, res: Response) => {
 
     res.success({ messages }, "Messages retrieved");
   } catch (error) {
+    logger
+      .child({
+        childData: {
+          chatId,
+          creatorId,
+          error,
+        },
+      })
+      .error(error);
+
+    console.error("Error getting messages by chatId:", error);
+
     res.internalServerError("Server error");
   }
 };
@@ -100,6 +124,19 @@ export const deleteMessage = async (req: Request, res: Response) => {
 
     res.success({}, "Message deleted");
   } catch (error) {
+    logger
+      .child({
+        childData: {
+          chatId,
+          id,
+          creatorId,
+          error,
+        },
+      })
+      .error(error);
+
+    console.error("Error deleting message:", error);
+
     res.internalServerError("Server error");
   }
 };
@@ -136,6 +173,20 @@ export const editMessage = async (req: Request, res: Response) => {
 
     res.success({}, "Message edited");
   } catch (error) {
+    logger
+      .child({
+        childData: {
+          chatId,
+          id,
+          text,
+          creatorId,
+          error,
+        },
+      })
+      .error(error);
+
+    console.error("Error editing message:", error);
+
     res.internalServerError("Server error");
   }
 };
@@ -179,6 +230,19 @@ export const forwardMessage = async (req: Request, res: Response) => {
 
     res.created({ chatId, text: repliedMessage.text }, "Message forwarded");
   } catch (error) {
+    logger
+      .child({
+        childData: {
+          chatId,
+          repliedMessageId,
+          creatorId,
+          error,
+        },
+      })
+      .error(error);
+
+    console.error("Error forwarding message:", error);
+
     res.internalServerError("Server error");
   }
 };

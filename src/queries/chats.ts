@@ -59,3 +59,12 @@ export const getChats = async (
 
   return chats;
 };
+
+export const inviteUserToChat = async (chatId: number, userId: number) => {
+  const [result] = await connection.query(
+    `INSERT INTO UsersChats (chatId, userId) VALUES (?, ?)`,
+    [chatId, userId]
+  );
+
+  return result;
+};

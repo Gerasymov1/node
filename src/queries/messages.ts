@@ -15,15 +15,16 @@ export const createMessage = async (
 
 export const getMessagesByChatId = async (
   chatId: number,
-  creatorId: number,
   search: string,
   limit: number,
   offset: number
 ) => {
   const query = `
-    SELECT * FROM Messages
-    WHERE chatId = ? AND creatorId = ? AND (text LIKE ?)
-    ORDER BY createdAt DESC
+    SELECT Messages.*, Users.firstName, Users.lastName
+    FROM Messages
+    JOIN Users ON Messages.creatorId = Users.id
+    WHERE Messages.chatId = ? AND (Messages.text LIKE ?)
+    ORDER BY Messages.createdAt DESC
     LIMIT ? OFFSET ?;
   `;
 
@@ -31,7 +32,6 @@ export const getMessagesByChatId = async (
 
   const [messages]: any = await connection.query(query, [
     chatId,
-    creatorId,
     searchPattern,
     limit,
     offset,
