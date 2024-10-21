@@ -1,51 +1,33 @@
 import { updateUser } from "../usersControllers";
 import { expect } from "chai";
 import sinon, { SinonStub } from "sinon";
-import connection from "../../settings/db.ts";
+import { restoreSandbox, setupSandbox } from "../../heplers/testHelpers.ts";
 
 describe("update user", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionExecuteStub: SinonStub,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
+  let connectionExecuteStub: SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionExecuteStub = sandbox.stub(connection, "execute");
-    connectionQueryStub = sandbox.stub(connection, "query");
-
-    req = {
+    const setup = setupSandbox({
       body: {
         firstName: "John",
         lastName: "Doe",
         password: "password123",
         email: "john.doe@example.com",
       },
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-    };
-
-    res = {
-      status: sandbox.stub().returnsThis(),
-      send: sandbox.stub().returnsThis(),
-      badRequest: sandbox.stub().returnsThis(),
-      notFound: sandbox.stub().returnsThis(),
-      permissionDenied: sandbox.stub().returnsThis(),
-      unauthorized: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      conflict: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-      created: sandbox.stub().returnsThis(),
-    };
+    });
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
+    connectionExecuteStub = setup.connectionExecuteStub;
   });
 
   afterEach(() => {
-    sandbox.restore();
+    restoreSandbox(sandbox);
   });
 
   it("should return bad request if the user does not fill all required fields", async () => {

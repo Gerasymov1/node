@@ -1,42 +1,30 @@
 import {
-  getChats,
   createChat,
   deleteChat,
   editChat,
+  getChats,
   inviteUserToChat,
 } from "../chatsControllers.ts";
 import { expect } from "chai";
-import sinon, { SinonStub } from "sinon";
-import connection from "../../settings/db.ts";
+import sinon from "sinon";
+import { restoreSandbox, setupSandbox } from "../../heplers/testHelpers.ts";
 
 describe("get chats", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
-
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-    };
+    const setup = setupSandbox({});
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
   });
 
   afterEach(() => {
-    sandbox.restore();
+    restoreSandbox(sandbox);
   });
 
   it("should return bad request if creatorId is not provided", async () => {
@@ -75,35 +63,21 @@ describe("get chats", () => {
 });
 
 describe("create chat", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
-
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-      created: sandbox.stub().returnsThis(),
-      notFound: sandbox.stub().returnsThis(),
-    };
+    const setup = setupSandbox({});
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
   });
 
   afterEach(() => {
-    sandbox.restore();
+    restoreSandbox(sandbox);
   });
 
   it("should return bad request if title is not provided", async () => {
@@ -149,31 +123,21 @@ describe("create chat", () => {
 });
 
 describe("delete chat", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
+    const setup = setupSandbox({});
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
+  });
 
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-      created: sandbox.stub().returnsThis(),
-      notFound: sandbox.stub().returnsThis(),
-    };
+  afterEach(() => {
+    restoreSandbox(sandbox);
   });
 
   afterEach(() => {
@@ -224,38 +188,21 @@ describe("delete chat", () => {
 });
 
 describe("edit chat", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
-
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-      body: {
-        title: "Test chat",
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-      created: sandbox.stub().returnsThis(),
-      notFound: sandbox.stub().returnsThis(),
-    };
+    const setup = setupSandbox({ body: { title: "Title" } });
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
   });
 
   afterEach(() => {
-    sandbox.restore();
+    restoreSandbox(sandbox);
   });
 
   it("should return bad request if chatId is not provided", async () => {
@@ -314,38 +261,21 @@ describe("edit chat", () => {
 });
 
 describe("invite user to chat", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
-
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-      body: {
-        userId: 1,
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-      created: sandbox.stub().returnsThis(),
-      notFound: sandbox.stub().returnsThis(),
-    };
+    const setup = setupSandbox({ body: { userId: 1 } });
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
   });
 
   afterEach(() => {
-    sandbox.restore();
+    restoreSandbox(sandbox);
   });
 
   it("should return bad request if chatId is not provided", async () => {

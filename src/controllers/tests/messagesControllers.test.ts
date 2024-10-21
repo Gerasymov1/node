@@ -1,42 +1,30 @@
 import { expect } from "chai";
-import sinon, { SinonStub } from "sinon";
-import connection from "../../settings/db.ts";
+import sinon from "sinon";
 import {
-  getMessagesByChatId,
   createMessage,
   deleteMessage,
   editMessage,
   forwardMessage,
+  getMessagesByChatId,
 } from "../messagesControllers.ts";
+import { restoreSandbox, setupSandbox } from "../../heplers/testHelpers.ts";
 
 describe("get messages by chat id", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
-
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-    };
+    const setup = setupSandbox({});
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
   });
 
   afterEach(() => {
-    sandbox.restore();
+    restoreSandbox(sandbox);
   });
 
   it("should return bad request if chatId is not provided", async () => {
@@ -93,34 +81,21 @@ describe("get messages by chat id", () => {
 });
 
 describe("create message", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
-
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-      created: sandbox.stub().returnsThis(),
-    };
+    const setup = setupSandbox({});
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
   });
 
   afterEach(() => {
-    sandbox.restore();
+    restoreSandbox(sandbox);
   });
 
   it("should return bad request if chatId is not provided", async () => {
@@ -163,33 +138,21 @@ describe("create message", () => {
 });
 
 describe("delete message", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
-
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-    };
+    const setup = setupSandbox({});
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
   });
 
   afterEach(() => {
-    sandbox.restore();
+    restoreSandbox(sandbox);
   });
 
   it("should return bad request if messageId is not provided", async () => {
@@ -220,33 +183,21 @@ describe("delete message", () => {
 });
 
 describe("edit message", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
+    const setup = setupSandbox({ body: { text: "Hello" } });
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
+  });
 
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-      body: {
-        text: "Hello",
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-      created: sandbox.stub().returnsThis(),
-    };
+  afterEach(() => {
+    restoreSandbox(sandbox);
   });
 
   afterEach(() => {
@@ -291,38 +242,21 @@ describe("edit message", () => {
 });
 
 describe("forward message", () => {
-  let req: any,
-    res: any,
-    sandbox: sinon.SinonSandbox,
-    connectionQueryStub: SinonStub;
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    connectionQueryStub = sandbox.stub(connection, "query");
-
-    req = {
-      user: {
-        id: 123,
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      },
-      body: {
-        text: "Hello",
-      },
-    };
-
-    res = {
-      badRequest: sandbox.stub().returnsThis(),
-      internalServerError: sandbox.stub().returnsThis(),
-      success: sandbox.stub().returnsThis(),
-      created: sandbox.stub().returnsThis(),
-      notFound: sandbox.stub().returnsThis(),
-    };
+    const setup = setupSandbox({ body: { text: "Hello" } });
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
   });
 
   afterEach(() => {
-    sandbox.restore();
+    restoreSandbox(sandbox);
   });
 
   it("should return bad request if messageId is not provided", async () => {
