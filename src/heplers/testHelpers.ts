@@ -30,6 +30,8 @@ export function setupSandbox({ body }: Props) {
     notFound: sandbox.stub().returnsThis(),
     status: sandbox.stub().returnsThis(),
     send: sandbox.stub().returnsThis(),
+    unauthorized: sandbox.stub().returnsThis(),
+    cookie: sandbox.stub().returnsThis(),
   };
 
   return { req, res, sandbox, connectionQueryStub, connectionExecuteStub };

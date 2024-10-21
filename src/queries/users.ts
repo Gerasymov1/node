@@ -2,12 +2,17 @@ import connection from "../settings/db";
 import { User } from "../types";
 
 export const findUserByEmail = async (email: string) => {
-  const [rows]: any = await connection.query(
+  const result = await connection.query(
     "SELECT * FROM Users WHERE email = ?;",
     [email]
   );
 
-  return rows[0];
+  if (Array.isArray(result) && result.length > 0) {
+    const [rows]: any = result;
+    return rows.length > 0 ? rows[0] : null;
+  }
+
+  return null;
 };
 
 export const findUserById = async (id: number) => {
