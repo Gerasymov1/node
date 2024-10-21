@@ -5,10 +5,16 @@ export const insertRefreshTokenByUser = async (
   userId: number,
   refreshTokenExpiresAt: Date
 ) => {
-  const [result] = await connection.query(
-    `INSERT INTO RefreshTokens (token, userId, expiresAt) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expiresAt = VALUES(expiresAt);`,
-    [refreshToken, userId, refreshTokenExpiresAt]
-  );
+  try {
+    const [result] = await connection.query(
+      `INSERT INTO RefreshTokens (token, userId, expiresAt) 
+      VALUES (?, ?, ?) 
+      ON DUPLICATE KEY UPDATE token = VALUES(token), expiresAt = VALUES(expiresAt);`,
+      [refreshToken, userId, refreshTokenExpiresAt]
+    );
 
-  return result;
+    return result;
+  } catch (error) {
+    throw new Error("Failed to insert refresh token");
+  }
 };

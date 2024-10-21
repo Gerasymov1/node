@@ -50,6 +50,6 @@ export const updateUser = async (req: Request, res: Response) => {
 
     console.error("Error updating user", error);
 
-    return res.status(500).send("Error updating user  " + error);
+    return res.internalServerError("Error updating user");
   }
 };
