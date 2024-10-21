@@ -32,6 +32,7 @@ export function setupSandbox({ body }: Props) {
     send: sandbox.stub().returnsThis(),
     unauthorized: sandbox.stub().returnsThis(),
     cookie: sandbox.stub().returnsThis(),
+    conflict: sandbox.stub().returnsThis(),
   };
 
   return { req, res, sandbox, connectionQueryStub, connectionExecuteStub };

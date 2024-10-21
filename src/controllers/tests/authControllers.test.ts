@@ -1,6 +1,6 @@
 import sinon from "sinon";
 import { restoreSandbox, setupSandbox } from "../../heplers/testHelpers.ts";
-import { login } from "../authControllers.ts";
+import { login, register } from "../authControllers.ts";
 import { expect } from "chai";
 import bcrypt from "bcrypt";
 
@@ -122,5 +122,90 @@ describe("login", () => {
         "Logged in"
       )
     ).to.be.true;
+  });
+});
+
+describe("register", () => {
+  let req: any;
+  let res: any;
+  let sandbox: sinon.SinonSandbox;
+  let connectionQueryStub: sinon.SinonStub;
+  let bcryptStub: sinon.SinonStub;
+
+  beforeEach(() => {
+    const setup = setupSandbox({
+      body: {
+        password: "password",
+        email: "email",
+        firstName: "John",
+        lastName: "Doe",
+      },
+    });
+    req = setup.req;
+    res = setup.res;
+    sandbox = setup.sandbox;
+    connectionQueryStub = setup.connectionQueryStub;
+    bcryptStub = sandbox.stub(bcrypt, "compare");
+  });
+
+  afterEach(() => {
+    restoreSandbox(sandbox);
+  });
+
+  it('should return bad request if "firstName", "lastName", "password" or "email" is not provided', async () => {
+    req.body = { password: "", email: "", firstName: "", lastName: "" };
+
+    await register(req, res);
+
+    expect(res.badRequest.calledOnce).to.be.true;
+    expect(res.badRequest.calledWith("Invalid request, fill in all fields")).to
+      .be.true;
+  });
+
+  it("should return internal server error if user creation fails", async () => {
+    connectionQueryStub.throws(new Error("Error creating user"));
+    await register(req, res);
+
+    expect(res.internalServerError.calledOnce).to.be.true;
+    expect(res.internalServerError.calledWith("Error creating user")).to.be
+      .true;
+  });
+
+  it("should return success if user is created", async () => {
+    const mockedUser = {
+      password: "hashed_password",
+      email: "john.doe@example.com",
+      firstName: "John",
+      lastName: "Doe",
+    };
+
+    connectionQueryStub.onCall(0).resolves([[]]);
+    bcryptStub.onCall(0).resolves("hashed_password");
+    connectionQueryStub.onCall(1).resolves([[mockedUser]]);
+
+    await register(req, res);
+
+    expect(res.created.calledOnce).to.be.true;
+    expect(
+      res.created.calledWith(
+        { user: { firstName: "John", lastName: "Doe", email: "email" } },
+        "User created"
+      )
+    ).to.be.true;
+  });
+
+  it("should return conflict if user already exists", async () => {
+    const mockedUser = {
+      password: "hashed_password",
+      email: "john.doe@example.com",
+      firstName: "John",
+      lastName: "Doe",
+    };
+
+    connectionQueryStub.onCall(0).resolves([[mockedUser]]);
+    await register(req, res);
+
+    expect(res.conflict.calledOnce).to.be.true;
+    expect(res.conflict.calledWith("User already exists")).to.be.true;
   });
 });
