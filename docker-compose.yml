@@ -6,7 +6,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/0_init.sql
-      - $HOME/database:/var/lib/mysql
     ports:
       - "3306:3306"
     expose:
