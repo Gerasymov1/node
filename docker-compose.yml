@@ -5,7 +5,7 @@ services:
     container_name: mysqlcontainer
     restart: unless-stopped
     volumes:
-      - ./mysql/init.sql:/docker-entrypoint-initdb.d/0_init.sql
+      - ./src/settings/init.sql:/docker-entrypoint-initdb.d/0_init.sql
     ports:
       - "3306:3306"
     expose:
