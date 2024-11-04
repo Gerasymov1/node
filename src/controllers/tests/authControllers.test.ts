@@ -106,7 +106,7 @@ describe("login", () => {
 
     await login(req, res);
 
-    console.log(res.success.args);
+    console.log(res.success.args, "===============");
 
     expect(res.success.called).to.be.true;
     expect(res.success.args).to.deep.include([
