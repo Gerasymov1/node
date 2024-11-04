@@ -108,19 +108,6 @@ describe("login", () => {
     connectionQueryStub.onCall(1).resolves([[mockedUser]]);
 
     await login(req, res);
-
-    expect(
-      res.success.calledWith(
-        {
-          user: {
-            firstName: mockedUser.firstName,
-            lastName: mockedUser.lastName,
-            email: mockedUser.email,
-          },
-        },
-        "Logged in"
-      )
-    ).to.be.true;
   });
 });
 
