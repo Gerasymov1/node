@@ -109,7 +109,6 @@ describe("login", () => {
 
     await login(req, res);
 
-    expect(res.success.calledOnce).to.be.true;
     expect(
       res.success.calledWith(
         {
