@@ -109,13 +109,17 @@ describe("login", () => {
 
     await login(req, res);
 
-    expect(res.success.firstCall.args[0]).to.deep.equal({
-      user: {
-        firstName: "John",
-        lastName: "Doe",
-        email: "john.doe@example.com",
+    expect(res.success.called).to.be.true;
+    expect(res.success.args).to.deep.include([
+      {
+        user: {
+          firstName: "John",
+          lastName: "Doe",
+          email: "john.doe@example.com",
+        },
       },
-    });
+      "Logged in",
+    ]);
   });
 });
 
