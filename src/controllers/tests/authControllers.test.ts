@@ -108,6 +108,14 @@ describe("login", () => {
     connectionQueryStub.onCall(1).resolves([[mockedUser]]);
 
     await login(req, res);
+
+    expect(res.success.firstCall.args[0]).to.deep.equal({
+      user: {
+        firstName: "John",
+        lastName: "Doe",
+        email: "john.doe@example.com",
+      },
+    });
   });
 });
 
