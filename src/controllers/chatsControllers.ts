@@ -6,8 +6,8 @@ import {
   getChats as getChatsQuery,
   updateChat as updateChatQuery,
   inviteUserToChat as inviteUserToChatQuery,
-} from "../queries";
-import logger from "../config/logger";
+} from "../queries/index.ts";
+import logger from "../config/logger.ts";
 
 export const getChats = async (req: Request, res: Response) => {
   const creatorId = req.user?.id;

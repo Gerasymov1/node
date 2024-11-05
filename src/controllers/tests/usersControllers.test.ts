@@ -1,4 +1,4 @@
-import { updateUser } from "../usersControllers";
+import { updateUser } from "../usersControllers.ts";
 import { expect } from "chai";
 import sinon, { SinonStub } from "sinon";
 import { restoreSandbox, setupSandbox } from "../../heplers/testHelpers.ts";

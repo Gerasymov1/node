@@ -5,7 +5,7 @@ import {
   editChat,
   getChats,
   inviteUserToChat,
-} from "../../controllers";
+} from "../../controllers/index.ts";
 import { privateMessagesRouter } from "../messagesRoutes/privateMessagesRouter.ts";
 import {
   createMessage,

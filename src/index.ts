@@ -2,8 +2,8 @@ import express from "express";
 import cookieParser from "cookie-parser";
 
 import router from "./routes/index.js";
-import { handleSetHeaders } from "./middlewares";
-import { PORT } from "./constants";
+import { handleSetHeaders } from "./middlewares/index.ts";
+import { PORT } from "./constants/index.ts";
 import { responseMiddleware } from "./middlewares/response.ts";
 
 const app = express();

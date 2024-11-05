@@ -1,5 +1,5 @@
-import connection from "../settings/db";
-import { User } from "../types";
+import connection from "../settings/db.ts";
+import { User } from "../types/index.ts";
 
 export const findUserByEmail = async (email: string) => {
   const result = await connection.query(

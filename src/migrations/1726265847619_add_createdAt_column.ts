@@ -1,4 +1,4 @@
-import connection from "../settings/db";
+import connection from "../settings/db.ts";
 
 export const up = async () => {
   const query = `ALTER TABLE Migrations ADD COLUMN createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`;

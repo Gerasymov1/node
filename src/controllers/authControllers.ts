@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { createUser, findUserByEmail } from "../queries";
+import { createUser, findUserByEmail } from "../queries/index.ts";
 import bcrypt from "bcryptjs";
 import { QueryResult } from "mysql2";
 import logger from "../config/logger.ts";
-import { User } from "../types";
-import { generateTokens } from "../middlewares";
+import { User } from "../types/index.ts";
+import { generateTokens } from "../middlewares/index.ts";
 
 type ExtendedQueryResult = {
   insertId: number;
