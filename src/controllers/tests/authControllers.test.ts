@@ -2,7 +2,7 @@ import sinon from "sinon";
 import { restoreSandbox, setupSandbox } from "../../heplers/testHelpers.ts";
 import { login, register } from "../authControllers.ts";
 import { expect } from "chai";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 describe("login", () => {
   let req: any;

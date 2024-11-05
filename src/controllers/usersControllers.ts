@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
 import { findUserById, updateUser as updateUserQuery } from "../queries";
 import logger from "../config/logger.ts";

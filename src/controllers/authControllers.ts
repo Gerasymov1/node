@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { createUser, findUserByEmail } from "../queries";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { QueryResult } from "mysql2";
 import logger from "../config/logger.ts";
 import { User } from "../types";

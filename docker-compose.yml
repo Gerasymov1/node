@@ -1,0 +1,48 @@
+services:
+  mysqldb:
+    image: mysql:9.1.0
+    platform: linux/arm64/v8
+    container_name: mysqlcontainer
+    restart: unless-stopped
+    volumes:
+      - ./src/settings/init.sql:/docker-entrypoint-initdb.d/0_init.sql
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USER}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysqldb
+    networks:
+      - internalnet
+
+  nodeapp:
+    container_name: nodeaapcontainer
+    build: .
+    image: node:alpine3.11
+    platform: linux/arm64/v8
+    ports:
+      - "5001:5001"
+    expose:
+      - "5001"
+    environment:
+      DB_HOST: mysqldb
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: nodeappservice
+      SERVICE_PORT: ${PORT}
+    depends_on:
+        - mysqldb
+    networks:
+      - internalnet
+
+networks:
+  internalnet:
+    driver: bridge
