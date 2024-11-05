@@ -97,27 +97,27 @@ describe("login", () => {
 
     connectionQueryStub.onCall(0).resolves([[mockedUser]]);
     bcryptStub.onCall(0).resolves(true);
+    connectionExecuteStub.onCall(0).resolves([[mockedUser]]);
+    connectionQueryStub.onCall(1).resolves([[mockedUser]]);
     generateTokensStub.onCall(0).resolves({
       accessToken: "accessToken",
       refreshToken: "refreshToken",
     });
-    connectionExecuteStub.onCall(0).resolves([[mockedUser]]);
-    connectionQueryStub.onCall(1).resolves([[mockedUser]]);
 
     await login(req, res);
 
-    console.log(res.success.args, "===============");
-
     expect(res.success.called).to.be.true;
-    expect(res.success.args).to.deep.include([
-      {
-        user: {
-          firstName: "John",
-          lastName: "Doe",
-          email: "john.doe@example.com",
+    expect(res.success.args).to.deep.equal([
+      [
+        {
+          user: {
+            firstName: "John",
+            lastName: "Doe",
+            email: "email",
+          },
         },
-      },
-      "Logged in",
+        "Logged in",
+      ],
     ]);
   });
 });
