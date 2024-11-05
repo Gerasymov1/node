@@ -103,7 +103,7 @@ export const register = async (req: Request, res: Response) => {
 
     const searchedUser = await findUserByEmail(email);
 
-    if (!!searchedUser) {
+    if (searchedUser) {
       logger
         .child({
           childData: {
