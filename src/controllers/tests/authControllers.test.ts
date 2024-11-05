@@ -99,10 +99,6 @@ describe("login", () => {
     bcryptStub.onCall(0).resolves(true);
     connectionExecuteStub.onCall(0).resolves([[mockedUser]]);
     connectionQueryStub.onCall(1).resolves([[mockedUser]]);
-    generateTokensStub.onCall(0).resolves({
-      accessToken: "accessToken",
-      refreshToken: "refresh token",
-    });
 
     await login(req, res);
 
