@@ -1,4 +1,5 @@
-name: Check
+env:
+  NAME: 'dev'
 on:
   push:
     branches: [ main ]
