@@ -28,5 +28,6 @@ jobs:
 
       - name: Run tests
         env:
+          name: production
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: npm test
