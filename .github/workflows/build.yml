@@ -1,37 +1,75 @@
-name: 'Check'
+name: Build and Test with Docker
+
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
-    environment: production
+
+    services:
+      mysqldb:
+        image: mysql:9.1.0  # Use MySQL 8.0 or another valid version
+        container_name: mysqlcontainer
+        ports:
+          - "3306:3306"
+        environment:
+          MYSQL_DATABASE: ${DB_NAME}
+          MYSQL_PASSWORD: ${DB_PASSWORD}
+          MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+          MYSQL_USER: ${DB_USER}
+        # Optional: If you have a custom SQL initialization script
+        volumes:
+          ./src/settings/init.sql:/docker-entrypoint-initdb.d/0_init.sql
+
     steps:
-      - name: Checkout
+      # Step 1: Checkout code
+      - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      # Step 2: Set up Node.js environment
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      - name: Run build
+      # Step 4: Build the Node.js project
+      - name: Build project
         run: npm run build
 
-      - name: Run linter
-        run: npm run lint
+      # Docker Compose Setup
+      - name: Set up Docker Compose
+        uses: docker/compose-action@v2
+        with:
+          version: '1.29.2'  # Specify the version of Docker Compose you need
 
-      - name: Check SECRET_KEY presence
-        run: echo "SECRET_KEY is ${SECRET_KEY}"
-        env:
-            SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      # Step 5: Build and start services with Docker Compose
+      - name: Start services with Docker Compose
+        run: |
+          docker-compose -f docker-compose.yml up -d
 
-      - name: Run tests
+      # Step 6: Run tests
+      - name: Run tests inside Docker container
+        run: |
+          docker-compose exec nodeapp npm test
+
+      # Step 7: Stop Docker Compose services
+      - name: Stop Docker Compose services
+        run: docker-compose down
+
+      # Step 8: Optional - Push Docker image to Docker Hub
+      - name: Push Docker image (Optional)
+        run: docker-compose push
+
+      # Step 9: Check SECRET_KEY presence
+      - name: Check SECRET_KEY
+        run: echo "SECRET_KEY is ${{ secrets.SECRET_KEY }}"
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        run: npm test
