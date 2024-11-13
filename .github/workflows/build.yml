@@ -21,46 +21,50 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js environment
+      # Step 2: Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 3: Install Docker Compose
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      # Step 4: Set up Node.js environment
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      # Step 3: Install dependencies
+      # Step 5: Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # Step 4: Build the Node.js project
+      # Step 6: Build the Node.js project
       - name: Build project
         run: npm run build
 
-      # Step 5: Set up Docker Compose
-      - name: Set up Docker Compose
-        uses: docker/compose-action@v2
-        with:
-          version: '1.29.2'  # Specify the version of Docker Compose you need
-
-      # Step 6: Start services with Docker Compose
+      # Step 7: Start services with Docker Compose
       - name: Start services with Docker Compose
         run: |
           docker-compose -f docker-compose.yml up -d
 
-      # Step 7: Run tests inside Docker container
+      # Step 8: Run tests inside Docker container
       - name: Run tests inside Docker container
         run: |
           docker-compose exec nodeapp npm test
 
-      # Step 8: Stop Docker Compose services
+      # Step 9: Stop Docker Compose services
       - name: Stop Docker Compose services
         run: docker-compose down
 
-      # Step 9: Check SECRET_KEY
+      # Step 10: Check SECRET_KEY presence
       - name: Check SECRET_KEY presence
         run: echo "SECRET_KEY is ${{ secrets.SECRET_KEY }}"
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
-      # Step 10: Optional - Push Docker image to Docker Hub
+      # Step 11: Optional - Push Docker image to Docker Hub
       - name: Push Docker image (Optional)
         run: docker-compose push
