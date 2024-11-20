@@ -15,30 +15,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - name: Load environment variables
-        run: |
-            if [ -f .env ]; then
-              echo "Loading environment variables from .env"
-              export $(grep -v '^#' .env | xargs)
-            else
-              echo ".env file not found"
-                 exit 1
-              fi
       - name: Install dependencies
         run: npm ci
-        
       - name: Run build
         run: npm run build
       - name: Run linter
         run: npm run lint
 
-      - name: Check SECRET_KEY presence
-        run: echo "SECRET_KEY is ${SECRET_KEY}"
+      - name: Start Docker services
+        run: docker-compose up -d
         env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_USER: ${{ secrets.DB_USER }}
 
       - name: Run tests
         env:
        
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: npm test
+
+      - name: Tear down Docker services
+        if: always()
+        run: docker-compose down
