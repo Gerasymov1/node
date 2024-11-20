@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
-import { findUserById, updateUser as updateUserQuery } from "../queries";
+import {
+  findUserById,
+  updateUser as updateUserQuery,
+} from "../queries/index.ts";
 import logger from "../config/logger.ts";
 
 export const updateUser = async (req: Request, res: Response) => {

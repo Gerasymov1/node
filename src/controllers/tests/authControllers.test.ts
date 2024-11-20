@@ -88,40 +88,33 @@ describe("login", () => {
 
   it("should return success if login is successful", async () => {
     const mockedUser = {
-      password: "hashed_password",
-      email: "john.doe@example.com",
+      password: "password",
+      email: "email",
       firstName: "John",
       lastName: "Doe",
       id: 123,
     };
 
-    req.body.password = "hashed_password";
-    req.body.email = "john.doe@example.com";
-
     connectionQueryStub.onCall(0).resolves([[mockedUser]]);
     bcryptStub.onCall(0).resolves(true);
-    generateTokensStub.onCall(0).resolves({
-      accessToken: "accessToken",
-      refreshToken: "refreshToken",
-    });
     connectionExecuteStub.onCall(0).resolves([[mockedUser]]);
     connectionQueryStub.onCall(1).resolves([[mockedUser]]);
 
     await login(req, res);
 
-    expect(res.success.calledOnce).to.be.true;
-    expect(
-      res.success.calledWith(
+    expect(res.success.called).to.be.true;
+    expect(res.success.args).to.deep.equal([
+      [
         {
           user: {
-            firstName: mockedUser.firstName,
-            lastName: mockedUser.lastName,
-            email: mockedUser.email,
+            firstName: "John",
+            lastName: "Doe",
+            email: "email",
           },
         },
-        "Logged in"
-      )
-    ).to.be.true;
+        "Logged in",
+      ],
+    ]);
   });
 });
 

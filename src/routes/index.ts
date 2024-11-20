@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { publicAuthRouter } from "./authRoutes/public";
-import { privateUsersRouter } from "./usersRoutes/privateUsersRouter";
-import { verifyToken } from "../middlewares";
-import { privateChatsRouter } from "./chatsRoutes/privateChatsRouter";
+import { publicAuthRouter } from "./authRoutes/public.js";
+import { privateUsersRouter } from "./usersRoutes/privateUsersRouter.ts";
+import { verifyToken } from "../middlewares/index.ts";
+import { privateChatsRouter } from "./chatsRoutes/privateChatsRouter.ts";
 
 const router = Router();
 

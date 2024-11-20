@@ -1,4 +1,4 @@
-import connection from "../settings/db";
+import connection from "../settings/db.ts";
 
 export const createUsersChatsTable = async () => {
   const checkIfTableExists = `SHOW TABLES LIKE 'UsersChats';`;

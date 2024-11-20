@@ -8,6 +8,7 @@
     "start": "npx tsx src/index.ts",
     "dev": "nodemon --watch src --exec npx tsx src/index.ts",
     "build": "tsc --project ./",
+    "lint": "eslint . ",
     "create:tables": "npx tsx ./src/settings/initializeTables.ts",
     "create:migration": "npx tsx ./src/scripts/createMigration.ts",
     "run:migration": "npx tsx ./src/scripts/runMigrations.ts",
@@ -20,10 +21,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.13.0",
+    "@typescript-eslint/parser": "^8.13.0",
     "bcryptjs": "^2.4.3",
     "chai": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
+    "eslint-plugin-chai-friendly": "^1.0.1",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.0",
     "nodemon": "^3.1.4",
@@ -32,6 +36,7 @@
     "winston": "^3.14.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.14.0",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/chai": "^5.0.0",
@@ -41,11 +46,15 @@
     "@types/mocha": "^10.0.9",
     "@types/node": "^22.3.0",
     "@types/sinon": "^17.0.3",
+    "eslint": "^9.14.0",
     "express": "^4.19.2",
+    "globals": "^15.12.0",
     "mocha": "^10.7.3",
     "mochawesome": "^7.1.3",
+    "sinon": "^19.0.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.13.0"
   }
 }

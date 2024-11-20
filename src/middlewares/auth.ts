@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 
 import jwt from "jsonwebtoken";
-import { SECRET_KEY } from "../constants";
-import { User } from "../types";
-import { findUserById, insertRefreshTokenByUser } from "../queries";
+import { SECRET_KEY } from "../constants/index.ts";
+import { User } from "../types/index.ts";
+import { findUserById, insertRefreshTokenByUser } from "../queries/index.ts";
 
 export const verifyToken = async (
   req: Request,

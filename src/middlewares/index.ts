@@ -1,2 +1,2 @@
-export * from "./headers";
-export * from "./auth";
+export * from "./headers.ts";
+export * from "./auth.ts";
