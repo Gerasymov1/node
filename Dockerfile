@@ -3,7 +3,7 @@ FROM --platform=linux/arm64/v8 node:alpine3.11
 WORKDIR /usr/code
 COPY package*.json ./
 
-RUN apk add --no-cache python3 make g++
+RUN apk update && apk add --no-cache python3 make g++
 
 RUN npm install
 COPY . .
