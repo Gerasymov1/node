@@ -1,4 +1,8 @@
-FROM --platform=linux/arm64/v8 node:alpine3.11
+FROM --platform=linux/arm64/v8 node:18-alpine
+
+# Install build dependencies
+RUN apk update && apk add --no-cache python3 make g++
+
 WORKDIR /usr/code
 COPY package*.json ./
 RUN npm install
