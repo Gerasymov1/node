@@ -15,6 +15,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+      - name: Load environment variables
+        run: |
+            if [ -f .env ]; then
+              echo "Loading environment variables from .env"
+              export $(grep -v '^#' .env | xargs)
+            else
+              echo ".env file not found"
+                 exit 1
+              fi
       - name: Install dependencies
         run: npm ci
       - name: Run build
