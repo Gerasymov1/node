@@ -32,3 +32,21 @@ jobs:
        
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: npm test
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Create builder instance
+        run: docker buildx create --use --name nodebuilder
+
+      - name: Build Docker image
+        run: docker buildx build --platform=linux/arm64/v8 -t node:latest .
+
+      - name: Transfer Docker Image to Server
+        run: docker save node:latest
+
+      - name: Deploy to server
+        run: |
+            docker stop node || true
+            docker rm node || true
+            docker run -d --name node -p 5001:5001 node:latest EOF
