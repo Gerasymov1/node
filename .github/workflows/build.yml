@@ -39,8 +39,5 @@ jobs:
       - name: Create builder instance
         run: docker buildx create --use --name nodebuilder
 
-      - name: Inspect builder instance
-        run: docker buildx inspect --bootstrap
-
       - name: Build Docker image
         run: docker buildx build --platform=linux/arm64/v8 -t node .
