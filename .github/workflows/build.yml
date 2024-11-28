@@ -33,5 +33,14 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: npm test
 
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Create builder instance
+        run: docker buildx create --use --name nodebuilder
+
+      - name: Inspect builder instance
+        run: docker buildx inspect --bootstrap
+
       - name: Build Docker image
-        run: docker build --platform=linux/arm64/v8 -t node .
+        run: docker buildx build --platform=linux/arm64/v8 -t node .
