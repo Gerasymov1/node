@@ -1,7 +1,7 @@
 FROM node:alpine3.11
 WORKDIR /usr/code
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 COPY . .
 EXPOSE 5001
 CMD ["npm", "run", "dev"]
