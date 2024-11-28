@@ -32,3 +32,6 @@ jobs:
        
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: npm test
+
+      - name: Build Docker image
+        run: docker build -t node:latest .
