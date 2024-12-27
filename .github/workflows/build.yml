@@ -11,14 +11,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
       - name: Install dependencies
         run: npm ci
+
       - name: Run build
         run: npm run build
+
       - name: Run linter
         run: npm run lint
 
@@ -42,11 +46,13 @@ jobs:
       - name: Build Docker image
         run: docker buildx build --platform=linux/arm64/v8 -t node:latest .
 
-      - name: Transfer Docker Image to Server
-        run: docker save node:latest
+      - name: Save Docker image to file
+        run: docker save -o myapp_latest.tar myapp:latest
 
       - name: Deploy to server
         run: |
             docker stop node || true
             docker rm node || true
-            docker run -d --name node -p 5001:5001 node:latest EOF
+            docker run -d --name node -p 5001:5001 \
+              -e SECRET_KEY=${{ secrets.SECRET_KEY }} \
+              myapp:latest
