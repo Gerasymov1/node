@@ -46,9 +46,6 @@ jobs:
       - name: Build Docker image
         run: docker buildx build --platform=linux/arm64/v8 -t myapp:latest --load .
 
-      - name: List Docker images
-        run: docker images
-
       - name: Save Docker image to file
         run: docker save -o myapp_latest.tar myapp:latest
 
