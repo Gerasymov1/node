@@ -26,14 +26,8 @@ jobs:
       - name: Run linter
         run: npm run lint
 
-      - name: Check SECRET_KEY presence
-        run: echo "SECRET_KEY is ${SECRET_KEY}"
-        env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-
       - name: Run tests
         env:
-       
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: npm test
 
@@ -48,11 +42,3 @@ jobs:
 
       - name: Save Docker image to file
         run: docker save -o myapp_latest.tar myapp:latest
-
-      - name: Deploy to server
-        run: |
-            docker stop node || true
-            docker rm node || true
-            docker run -d --name node -p 5001:5001 \
-              -e SECRET_KEY=${{ secrets.SECRET_KEY }} \
-              myapp:latest
