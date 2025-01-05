@@ -10,6 +10,8 @@ const app = express();
 
 app.use(cookieParser());
 
+console.log("Hello World");
+
 app.use(express.json());
 
 app.use(handleSetHeaders);
