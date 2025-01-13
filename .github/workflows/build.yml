@@ -42,19 +42,3 @@ jobs:
 
       - name: Save Docker image to file
         run: docker save -o myapp_latest.tar myapp:latest
-
-      - name: Install Railway CLI
-        run: npm install -g railway
-
-      - name: Login to Railway
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          run: echo $RAILWAY_TOKEN | railway login --token
-
-      - name: Link Railway Project
-        env:
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-        run: railway link $RAILWAY_PROJECT_ID
-
-      - name: Deploy to Railway
-        run: railway up --ci
