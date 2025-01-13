@@ -40,7 +40,6 @@ services:
       SERVICE_TAGS: dev
       SERVICE_NAME: nodeappservice
       SERVICE_PORT: ${PORT}
-    command: sh -c "npm run create:tables && npm run dev"
     depends_on:
         - mysqldb
     networks:
